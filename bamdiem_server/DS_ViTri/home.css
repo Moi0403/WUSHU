@@ -1,0 +1,161 @@
+
+.container{
+    display: flex;
+    flex-direction: column;
+}
+h1{
+    flex-wrap: wrap;
+}
+.header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.btn{
+    flex-shrink: 0;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+thead{
+    background-color: rgb(205, 254, 254);
+    color: black;
+    font-size: 30px;
+}
+table thead tr th{
+  border: 2px solid black;
+  text-align: center;
+}
+.vitri{
+    text-align: center;
+    border: 2px solid black;
+    font-size: 30px;
+    width: 0%;
+    font-weight: bold;
+}
+.diemdo{
+    background-color: rgb(245, 71, 71);
+    color: white;
+    width: 10%;
+    height: 100px;
+    border: 2px solid black;
+    text-align: center;
+    font-size: 50px;
+}
+.diemxanh{
+    background-color: rgb(84, 84, 235);
+    color: white;
+    width: 10%;
+    height: 100px;
+    border: 2px solid black;
+    text-align: center;
+    font-size: 50px;
+}
+.lichsu {
+    width: 30%; /* Đặt width cố định */
+    height: 20px; /* Đặt height cố định */
+    border: 2px solid black;
+    position: relative; /* Đặt vị trí tương đối để dễ dàng căn chỉnh */
+    
+}
+
+.lichsu::before {
+    content: ''; /* Thêm nội dung giả để tạo đường kẻ */
+    position: absolute; /* Đặt vị trí tuyệt đối để đặt đường kẻ */
+    left: 0; /* Đặt vị trí bắt đầu từ giữa phần tử .lichsu */
+    top: 50%; /* Đặt vị trí đầu tiên từ đầu phần tử .lichsu */
+    width: 100%; /* Độ rộng của đường kẻ */
+    height: 1px;/* Chiều cao tối đa của đường kẻ (bằng chiều cao của .lichsu) */
+    background-color: black; /* Màu sắc của đường kẻ */
+    transform: translateX(0%); /* Dịch chuyển đường kẻ về trung tâm */
+}
+
+
+.lichsu-do {
+    font-size: 20px;
+    font-weight: bold;
+    display: block;
+    color: red;
+}
+
+.lichsu-xanh {
+    font-size: 20px;
+    font-weight: bold;
+    display: block;
+    color: blue;
+}
+
+.ketqua{
+    width: 10%;
+    height: 100px;
+    border: 2px solid black;
+    text-align: center;
+}
+.result-blue {
+    background-image: linear-gradient(to right, rgb(253, 253, 253) 50%, rgb(84, 84, 235) 50%);
+    color: white;
+}
+
+.result-red {
+    background-image: linear-gradient(to right, rgb(245, 71, 71) 50%, rgb(253, 253, 253) 50%);
+    color: white;
+}
+
+.result-draw {
+    background-image: linear-gradient(to right, rgb(245, 71, 71) 50%, rgb(84, 84, 235) 50%);
+    color: white;
+}
+.thaotac{
+    width: 20%;
+    height: 100px;
+    border: 2px solid black;
+}
+.btn_xoa{
+    margin-right: 30px;
+    margin-left: 30px;
+}
+.modal {
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+}
+
+.modal-content {
+   background-color: white;
+   max-width: 500px;
+   position: relative;
+   left: 50%;
+   top: 20%;
+   transform: translateX(-50%);
+   padding: 20px;
+}
+.md{
+    display: flex;
+    gap: 170px;
+}
+.md p{
+    font-size: 30px;
+    font-weight: bold;
+}
+form button{
+    justify-content: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}

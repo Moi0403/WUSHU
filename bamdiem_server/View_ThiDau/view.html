@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIEW</title>
+    <link rel="stylesheet" href="./view.css">
+</head>
+<body>
+    <div class="container">
+        <div class="hear">
+            <h1 id="round">Chưa bắt đầu</h1>
+
+            <div class="banner">
+
+                <div class="name">
+                    <div class="item">
+                        <h2 class="name_n1" id="name_n1">Giáp đỏ</h2>
+                    <h2 class="province_n1" id="province_n1">Đơn vị</h2>
+                    </div>
+
+                    <div class="dongho">
+                        <h2 class="time" id="time">00:00</h2>
+                    </div>
+
+                    <div class="item">
+                        <h2 class="name_n2" id="name_n2">Giáp xanh</h2>
+                        <h2 class="province_n2" id="province_n2">Đơn vị </h2>
+                    </div>
+                </div>
+    
+            
+            </div>
+
+            <div class="tiso">
+                <h1 class="diemdo" id="diem_n1">0</h1>
+
+                <div class="lichsu">
+                    <table>
+                        <thead>
+                            <tr>
+                                
+                            </tr>
+                        </thead>
+                        <tbody id="tbody">
+                            <!-- Data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <h1 class="diemxanh" id="diem_n2">0</h1>
+            </div>
+        </div>
+    </div>
+
+    <script src="../database/config.js"></script>
+    <script>
+
+        const host = config;
+
+        const socket = new WebSocket(`ws://${config.host}:${config.port}`);
+
+        socket.onopen = function() {
+            console.log('WebSocket connection opened');
+        };
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            document.getElementById('round').textContent = data.round;
+            document.getElementById('name_n1').textContent = data.name_n1;
+            document.getElementById('province_n1').textContent = data.province_n1;
+            document.getElementById('name_n2').textContent = data.name_n2;
+            document.getElementById('province_n2').textContent = data.province_n2;
+            document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
+            document.getElementById('diem_n1').textContent = data.diem_n1;
+            document.getElementById('diem_n2').textContent = data.diem_n2;
+        };
+
+        socket.onerror = function(error) {
+            console.log('WebSocket Error: ' + error);
+        };
+
+        socket.onclose = function() {
+            console.log('WebSocket connection closed');
+        };
+
+
+        // Lấy id từ URL
+        // const urlParams = new URLSearchParams(window.location.search);
+        // const id = urlParams.get('id');
+
+        // const hienThiChiTiet = async () => {
+        //     try {
+        //         const response = await fetch(`${host}/list_thidau/${id}`);
+        //         if (!response.ok) {
+        //             throw new Error(`HTTP error! Status: ${response.status}`);
+        //         }
+        //         const data = await response.json();
+
+        //         // Hiển thị dữ liệu lên giao diện
+        //         document.getElementById('round').textContent = data.round;
+        //         document.querySelector('.time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
+        //         document.querySelector('.name_n1').textContent = data.name_n1;
+        //         document.querySelector('.name_n2').textContent = data.name_n2;
+        //         document.querySelector('.province_n1').textContent = data.province_n1;
+        //         document.querySelector('.province_n2').textContent = data.province_n2;
+        //         document.querySelector('.diemdo').textContent = data.diem_n1;
+        //         document.querySelector('.diemxanh').textContent = data.diem_n2;
+        //         // Các phần tử khác tương tự
+
+        //     } catch (error) {
+        //         console.error('Fetch error:', error);
+        //     }
+        // };
+
+        // // Gọi hàm hiển thị chi tiết
+        // hienThiChiTiet();
+        // setInterval(hienThiChiTiet, 100);
+
+        const hienThiLsu = async () => {
+            const tbody = document.querySelector('#tbody');
+
+            try {
+                const api = await fetch(`http://${config.host}:${config.port}/api/list`);
+                if (!api.ok) {
+                    throw new Error(`HTTP error! Status: ${api.status}`);
+                }
+                const data = await api.json();
+                console.log(data);
+
+                // Xóa dữ liệu cũ
+                tbody.innerHTML = '';
+
+                // Hiển thị dữ liệu mới
+                data.forEach((item) => {
+                    const row = document.createElement('tr');
+                    const vitriCell = document.createElement('td');
+                    vitriCell.classList.add('vtri');
+                    const diemdoCell = document.createElement('td');
+                    diemdoCell.classList.add('lichsu-do');
+                    const diemxanhCell = document.createElement('td');
+                    diemxanhCell.classList.add('lichsu-xanh');
+                    const spacingCell = document.createElement('td');
+                    spacingCell.classList.add('trong');
+
+                    vitriCell.textContent = item.vitri;
+                    diemdoCell.textContent = item.diemdo;
+                    diemxanhCell.textContent = item.diemxanh;
+
+                    const tdKetQua = document.createElement('td');
+                    const ketQua = item.diemxanh > item.diemdo ? 'Xanh thắng' : (item.diemxanh < item.diemdo ? 'Đỏ thắng' : 'Hòa');
+                    // tdKetQua.textContent = ketQua;
+                    tdKetQua.classList.add('ketqua');
+                    if (ketQua === 'Xanh thắng') {
+                        tdKetQua.classList.add('result-blue');
+                    } else if (ketQua === 'Đỏ thắng') {
+                        tdKetQua.classList.add('result-red');
+                    } else {
+                        tdKetQua.classList.add('result-draw');
+                    }
+
+                    row.appendChild(vitriCell);
+                    row.appendChild(diemdoCell);
+                    row.appendChild(diemxanhCell);
+                    row.appendChild(spacingCell);
+                    row.appendChild(tdKetQua);
+
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+        hienThiLsu();
+        setInterval(hienThiLsu, 500);
+    
+    </script>
+</body>
+</html>

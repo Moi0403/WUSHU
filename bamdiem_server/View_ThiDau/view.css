@@ -1,0 +1,144 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body {
+    width: 100%;
+    height: 100%;
+}
+.container {
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    font-weight: bold;
+}
+.hear{
+    display: block;
+    color: white;
+}
+h1{
+    text-align: center;
+    font-size: 100px;
+}
+.dongho{
+    display: flex;
+    flex-direction: row;
+    margin-top: 30px;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+}
+.time{
+    font-size: 110px;
+}
+.item{
+    text-align: center;
+}
+.name{
+    display: flex;
+    text-align: center;
+    gap: 100px;
+}
+.name_n1{
+    width: 500px;
+    height: 60px;
+    align-content: center;
+    margin-top: 35px;
+    border-radius: 10px;
+    font-size: 50px;
+    color: rgb(245, 71, 71);
+    
+}.name_n2{
+    width: 500px;
+    height: 60px;
+    align-content: center;
+    border-radius: 10px;
+    margin-top: 35px;
+    font-size: 50px;
+    color: rgb(84, 84, 235);
+}
+.tiso{
+    display: flex;
+    margin-top: 20px;
+    justify-content: center;
+    text-align: center;
+    gap: 150px;
+}
+.vtri{
+    color: rgb(0, 255, 72);
+    font-size: 40px;
+    width: 85px;
+}
+.diemdo{
+    font-size: 200px;
+    color: rgb(245, 71, 71);
+}
+.diemxanh{
+    font-size: 200px;
+    color: rgb(84, 84, 235);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0 15px;
+}
+thead{
+    background-color: rgb(205, 254, 254);
+    color: black;
+    font-size: 30px;
+}
+.lichsu {
+    width: 40%;
+    height: 60px;
+    display: flex;
+    text-align: center;
+}
+.lichsu-do {
+    font-size: 60px;
+    font-weight: bold;
+    background-color: red;
+    color: white;
+    border: 2px solid white;
+}
+
+.lichsu-xanh {
+    font-size: 60px;
+    font-weight: bold;
+    background-color: blue;
+    color:white;
+    border: 2px solid white;
+}
+.trong{
+    width: 15px;
+}
+.ketqua{
+    width: 70px;
+    height: 30px;
+    text-align: center;
+    border-radius: 100px;
+    justify-content: center;
+    align-items: center;
+}
+.result-blue {
+    background-color: rgb(84, 84, 235);
+    color: white;
+}
+
+.result-red {
+    background-color:  rgb(245, 71, 71);
+    color: white;
+}
+
+.result-draw {
+    background-image: linear-gradient(to right, rgb(245, 71, 71) 50%, rgb(84, 84, 235) 50%);
+    color: white;
+}
+.tdTT{
+    gap: 10px;
+}
+
+
+
