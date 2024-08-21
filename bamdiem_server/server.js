@@ -24,7 +24,12 @@ app.use('/api', router);
 
 const uri = COMMON.uri;
 
-// WebSocket connection
+mongoose.connect(uri).then(() => {
+    console.log('Kết nối MongoDB thành công');
+}).catch(err => {
+    console.error('Lỗi kết nối MongoDB:', err);
+});
+
 let currentData = {
     round: 'Chưa bắt đầu',
     name_n1: 'Giáp đỏ',
@@ -38,12 +43,43 @@ let currentData = {
 };
 
 wss.on('connection', (ws) => {
-    // Gửi dữ liệu hiện tại cho client mới kết nối
     ws.send(JSON.stringify(currentData));
 });
 
+let isOn = false;
+
+wss.on('connection', (ws) => {
+    console.log('Client connected');
+
+    ws.on('message', (message) => {
+        const data = JSON.parse(message);
+
+        if (data.action === 'on') {
+            isOn = true;
+            console.log('Switch turned ON');
+            // Bạn có thể thực hiện hành động gì đó khi chuyển ON
+        } else if (data.action === 'off') {
+            isOn = false;
+            console.log('Switch turned OFF');
+            // Bạn có thể thực hiện hành động gì đó khi chuyển OFF
+        } else if (data.action === 'resetAll') {
+            // Xử lý khi nhận yêu cầu reset tất cả
+        }
+
+        // Gửi trạng thái hiện tại đến tất cả các client kết nối
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ action: 'statusUpdate', isOn }));
+            }
+        });
+    });
+
+    ws.on('close', () => {
+        console.log('Client disconnected');
+    });
+});
+
 router.post('/view', (req, res) => {
-    // Cập nhật currentData với dữ liệu mới từ req.body
     currentData = {
         round: req.body.round || currentData.round,
         name_n1: req.body.name_n1 || currentData.name_n1,
@@ -56,7 +92,6 @@ router.post('/view', (req, res) => {
         diem_n2: req.body.diem_n2 !== undefined ? req.body.diem_n2 : currentData.diem_n2
     };
 
-    // Gửi dữ liệu mới qua WebSocket tới các client
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(currentData));
@@ -80,10 +115,8 @@ router.put('/update-view/:id', (req, res) => {
         diem_n2: req.body.diem_n2 !== undefined ? req.body.diem_n2 : currentData.diem_n2
     };
 
-    // Cập nhật currentData hoặc dữ liệu trong cơ sở dữ liệu của bạn
     currentData = updatedData;
 
-    // Gửi dữ liệu qua WebSocket tới các client
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(updatedData));
@@ -94,9 +127,6 @@ router.put('/update-view/:id', (req, res) => {
 });
 
 
-
-
-// REST API routes
 app.get('/ds_bdiem', async (req, res) => {
     await mongoose.connect(uri);
     let bdiems = await bdiemModel.find();
@@ -185,6 +215,35 @@ router.delete('/xoa/:id', async (req, res) => {
         res.send('Lỗi khi xóa');
     }
 });
+router.put('/reset-all', async (req, res) => {
+    try {
+        await mongoose.connect(uri);
+        const result = await bdiemModel.updateMany({}, {
+            diemdo: 0,
+            diemxanh: 0,
+            lichsudo: [],
+            lichsuxanh: []
+        });
+
+        if (result) {
+            res.send('Reset tất cả các điểm thành công');
+            
+            // Phát đi tín hiệu WebSocket tới Android để tải lại dữ liệu
+            const resetMessage = { action: 'resetAll' };
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(resetMessage));
+                }
+            });
+
+        } else {
+            res.status(500).send('Không tìm thấy dữ liệu để reset');
+        }
+    } catch (error) {
+        console.error('Lỗi khi reset:', error);
+        res.status(500).send('Lỗi khi reset');
+    }
+});
 
 router.put('/reset/:id', async (req, res) => {
     try {
@@ -198,9 +257,16 @@ router.put('/reset/:id', async (req, res) => {
         await mongoose.connect(uri);
         const result = await bdiemModel.findByIdAndUpdate(id, data);
         if (result) {
-            res.send('Reset thành công');
+            res.send('Reset tất cả các điểm thành công');
+            const resetMessage = { action: 'resetAll' };
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(resetMessage));
+                }
+            });
+
         } else {
-            res.send('Không tìm thấy dữ liệu để reset');
+            res.status(500).send('Không tìm thấy dữ liệu để reset');
         }
     } catch (error) {
         console.error('Lỗi khi reset:', error);
@@ -222,6 +288,7 @@ router.get('/list/:id', async (req, res) => {
         res.status(500).send('Lỗi khi lấy dữ liệu');
     }
 });
+
 
 router.get('/list_thidau', async (req, res) => {
     await mongoose.connect(uri);

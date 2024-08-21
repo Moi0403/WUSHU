@@ -7,15 +7,25 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 import fpoly.anhntph36936.bamdiem_app.API.HOSTAPI;
 import fpoly.anhntph36936.bamdiem_app.Model.thidauModel;
 import fpoly.anhntph36936.bamdiem_app.R;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.ResponseBody;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -26,6 +36,8 @@ public class Main_BamGio extends AppCompatActivity {
     Button btn_r1, btn_r2, btn_r3, btn_batdau, btn_huy,  btn_nghi, btn_1p30s, btn_2p;
     ImageView btn_ts_td, btn_ts_gd, btn_ts_tx, btn_ts_gx;
     TextView tv_sotran, tv_tsd, tv_tsx;
+    Switch aSwitch;
+    WebSocket webSocket;
     Button selectedButton = null;
     Button selectedButtonTime = null;
     String selectedRound = "";
@@ -54,6 +66,7 @@ public class Main_BamGio extends AppCompatActivity {
         btn_ts_gx = findViewById(R.id.btn_ts_gx);
         tv_tsd = findViewById(R.id.tv_tsd);
         tv_tsx = findViewById(R.id.tv_tsx);
+        aSwitch = findViewById(R.id.switch_toggle);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -72,9 +85,23 @@ public class Main_BamGio extends AppCompatActivity {
                 tv_tsx.setText(String.valueOf(diem_n2));
             }
         }
+
+        initWebSocket();
+
+        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    sendWebSocketMessage("on");
+                } else {
+                    sendWebSocketMessage("off");
+                }
+            }
+        });
         btn_batdau.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                sendWebSocketMessage("off");
                 Intent intent = new Intent(Main_BamGio.this, Main_Run.class);
                 intent.putExtra("id", itemId);
                 intent.putExtra("round", selectedRound);
@@ -156,7 +183,7 @@ public class Main_BamGio extends AppCompatActivity {
         btn_1p30s.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleButtonClickTime(btn_1p30s, 01, 30);
+                handleButtonClickTime(btn_1p30s, 00, 15);
             }
         });
 
@@ -298,6 +325,63 @@ public class Main_BamGio extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void sendWebSocketMessage(String action) {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("action", action);
+            if (webSocket != null) {
+                webSocket.send(jsonObject.toString());
+                Log.d("WebSocket", "Sent: " + jsonObject.toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initWebSocket() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                .build();
+
+        Request request = new Request.Builder()
+                .url("ws://" + HOSTAPI.HOST + "/ws")
+                .build();
+
+        webSocket = client.newWebSocket(request, new WebSocketListener() {
+
+            @Override
+            public void onOpen(WebSocket webSocket, okhttp3.Response response) {
+                Log.d("WebSocket", "Connected");
+                Log.d("WebSocket", "Response: " + response.toString());
+            }
+
+            @Override
+            public void onMessage(WebSocket webSocket, String text) {
+                Log.d("WebSocket", "Received: " + text);
+            }
+
+            @Override
+            public void onFailure(WebSocket webSocket, Throwable t, okhttp3.Response response) {
+                Log.e("WebSocket", "Error: " + t.getMessage());
+                t.printStackTrace(); // In chi tiết lỗi
+                if (response != null) {
+                    Log.e("WebSocket", "Response: " + response.message());
+                }
+            }
+
+            @Override
+            public void onClosing(WebSocket webSocket, int code, String reason) {
+                webSocket.close(code, reason);
+                Log.d("WebSocket", "Closing: " + reason);
+            }
+
+            @Override
+            public void onClosed(WebSocket webSocket, int code, String reason) {
+                Log.d("WebSocket", "Closed: " + reason);
+            }
+        });
     }
 
 }

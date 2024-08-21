@@ -53,7 +53,7 @@
                             <option value="Nam Định">19. Nam Định</option>
                             <option value="Nghệ An">20. Nghệ An</option>
                             <option value="Phú Thọ">21. Phú Thọ</option>
-                            <option value="Quân Đội">22. Quân Đội</option>
+                            <option value="Quân Đội">22. Quân Đội</option> 
                             <option value="Quảng Nam">23. Quảng Nam</option>
                             <option value="Quảng Ngãi">24. Quảng Ngãi</option>
                             <option value="Quảng Ninh">25. Quảng Ninh</option>
@@ -354,30 +354,6 @@
                             console.error('Lỗi khi xóa vị trí:', error);
                         }
                     });
-
-                    // const btnView = document.createElement('button');
-                    // btnView.textContent = 'View';
-                    // btnView.classList.add('btn', 'btn-outline-info');
-                    // btnView.addEventListener('click', () => {
-                    //     window.location.href = `../View_ThiDau/view.html?id=${item._id}`;
-                    // });
-
-                //     const btnDiem = document.createElement('button');
-                //     btnDiem.textContent = 'Diem';
-                //     btnDiem.classList.add('btn', 'btn-secondary');
-                //     btnDiem.addEventListener('click', () => {
-                //     const currentIdBdiem = item.id_bdiem;
-
-                //     // Kiểm tra xem currentIdBdiem đã tồn tại trong selectedIds hay chưa
-                //     if (!selectedIds.includes(currentIdBdiem)) {
-                //         // Nếu chưa tồn tại, thêm vào selectedIds và chuyển hướng
-                //         selectedIds.push(currentIdBdiem);
-                //         window.location.href = `../DS_ViTri/home.html?name_n1=${encodeURIComponent(item.name_n1)}&name_n2=${encodeURIComponent(item.name_n2)}`;
-                //     } else {
-                //         // Nếu đã tồn tại, hiển thị thông báo cảnh báo cho người dùng
-                //         alert('Dữ liệu đã tồn tại trong danh sách, vui lòng chọn mục khác.');
-                //     }
-                // });
                     
                     tr.appendChild(tdStt);
                     tr.appendChild(tdName1);
@@ -518,6 +494,16 @@
             sexSelect.addEventListener('change', updateWeightOptions);
             groupSelect.addEventListener('change', updateWeightOptions);
         });
+
+        document.addEventListener("keydown", function(event) {
+        if (event.code === "Delete"){
+            event.preventDefault();
+            const removeAll = document.getElementById('removeAll');
+            if (removeAll) {
+                removeAll.dispatchEvent(new Event('click'));
+            }
+        }
+});
 
 
 

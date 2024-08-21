@@ -54,10 +54,12 @@
 
     <script src="../database/config.js"></script>
     <script>
-
         const host = config;
-
         const socket = new WebSocket(`ws://${config.host}:${config.port}`);
+
+        const sound = new Audio(`../Sound/10s.mp3`);
+        const soundEnd = new Audio(`../Sound/endSound.mp3`);
+        sound.volume = 1.0;
 
         socket.onopen = function() {
             console.log('WebSocket connection opened');
@@ -65,15 +67,69 @@
 
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);
+            console.log("Received data: ", data);
 
-            document.getElementById('round').textContent = data.round;
-            document.getElementById('name_n1').textContent = data.name_n1;
-            document.getElementById('province_n1').textContent = data.province_n1;
-            document.getElementById('name_n2').textContent = data.name_n2;
-            document.getElementById('province_n2').textContent = data.province_n2;
-            document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
-            document.getElementById('diem_n1').textContent = data.diem_n1;
-            document.getElementById('diem_n2').textContent = data.diem_n2;
+            if (data.action === 'statusUpdate') {
+                console.log("Status Update Action Received: ", data.isOn);
+                return;
+            }
+
+             if (data.action === 'resetAll') {
+                document.getElementById('round').textContent = 'Chưa bắt đầu';
+                document.getElementById('name_n1').textContent = 'Giáp đỏ';
+                document.getElementById('province_n1').textContent = 'Đơn vị';
+                document.getElementById('name_n2').textContent = 'Giáp xanh';
+                document.getElementById('province_n2').textContent = 'Đơn vị';
+                document.getElementById('time').textContent = '00:00';
+                document.getElementById('diem_n1').textContent = '0';
+                document.getElementById('diem_n2').textContent = '0';
+                hienThiLsu();
+                return;
+            }
+
+                if (data.minute !== undefined && data.second !== undefined) {
+                    console.log("Minute: ", data.minute, "Second: ", data.second);
+                    document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
+                    
+                    if (data.minute === 0 && data.second === 10) {
+                        sound.play().then(() => {
+                            console.log("Sound played successfully");
+                        }).catch(error => {
+                            console.error("Error playing sound: ", error);
+                        });
+                    } else if(data.minute === 0 && data.second === 0) {
+                        soundEnd.play().then(() => {
+                            console.log("Sound played successfully");
+                        }).catch(error => {
+                            console.error("Error playing sound: ", error);
+                        });
+                    }
+                } else {
+                    if (data.round !== undefined) {
+                        document.getElementById('round').textContent = data.round;
+                    }
+                    if (data.name_n1 !== undefined) {
+                        document.getElementById('name_n1').textContent = data.name_n1;
+                    }
+                    if (data.province_n1 !== undefined) {
+                        document.getElementById('province_n1').textContent = data.province_n1;
+                    }
+                    if (data.name_n2 !== undefined) {
+                        document.getElementById('name_n2').textContent = data.name_n2;
+                    }
+                    if (data.province_n2 !== undefined) {
+                        document.getElementById('province_n2').textContent = data.province_n2;
+                    }
+                    if (data.minute !== undefined && data.second !== undefined) {
+                        document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
+                    }
+                    if (data.diem_n1 !== undefined) {
+                        document.getElementById('diem_n1').textContent = data.diem_n1;
+                    }
+                    if (data.diem_n2 !== undefined) {
+                        document.getElementById('diem_n2').textContent = data.diem_n2;
+                    }
+                }
         };
 
         socket.onerror = function(error) {
@@ -84,42 +140,8 @@
             console.log('WebSocket connection closed');
         };
 
-
-        // Lấy id từ URL
-        // const urlParams = new URLSearchParams(window.location.search);
-        // const id = urlParams.get('id');
-
-        // const hienThiChiTiet = async () => {
-        //     try {
-        //         const response = await fetch(`${host}/list_thidau/${id}`);
-        //         if (!response.ok) {
-        //             throw new Error(`HTTP error! Status: ${response.status}`);
-        //         }
-        //         const data = await response.json();
-
-        //         // Hiển thị dữ liệu lên giao diện
-        //         document.getElementById('round').textContent = data.round;
-        //         document.querySelector('.time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
-        //         document.querySelector('.name_n1').textContent = data.name_n1;
-        //         document.querySelector('.name_n2').textContent = data.name_n2;
-        //         document.querySelector('.province_n1').textContent = data.province_n1;
-        //         document.querySelector('.province_n2').textContent = data.province_n2;
-        //         document.querySelector('.diemdo').textContent = data.diem_n1;
-        //         document.querySelector('.diemxanh').textContent = data.diem_n2;
-        //         // Các phần tử khác tương tự
-
-        //     } catch (error) {
-        //         console.error('Fetch error:', error);
-        //     }
-        // };
-
-        // // Gọi hàm hiển thị chi tiết
-        // hienThiChiTiet();
-        // setInterval(hienThiChiTiet, 100);
-
         const hienThiLsu = async () => {
             const tbody = document.querySelector('#tbody');
-
             try {
                 const api = await fetch(`http://${config.host}:${config.port}/api/list`);
                 if (!api.ok) {
@@ -128,18 +150,21 @@
                 const data = await api.json();
                 console.log(data);
 
-                // Xóa dữ liệu cũ
                 tbody.innerHTML = '';
+                console.log(data); 
 
-                // Hiển thị dữ liệu mới
                 data.forEach((item) => {
                     const row = document.createElement('tr');
+
                     const vitriCell = document.createElement('td');
                     vitriCell.classList.add('vtri');
+
                     const diemdoCell = document.createElement('td');
                     diemdoCell.classList.add('lichsu-do');
+
                     const diemxanhCell = document.createElement('td');
                     diemxanhCell.classList.add('lichsu-xanh');
+
                     const spacingCell = document.createElement('td');
                     spacingCell.classList.add('trong');
 
@@ -149,7 +174,6 @@
 
                     const tdKetQua = document.createElement('td');
                     const ketQua = item.diemxanh > item.diemdo ? 'Xanh thắng' : (item.diemxanh < item.diemdo ? 'Đỏ thắng' : 'Hòa');
-                    // tdKetQua.textContent = ketQua;
                     tdKetQua.classList.add('ketqua');
                     if (ketQua === 'Xanh thắng') {
                         tdKetQua.classList.add('result-blue');
@@ -164,7 +188,6 @@
                     row.appendChild(diemxanhCell);
                     row.appendChild(spacingCell);
                     row.appendChild(tdKetQua);
-
                     tbody.appendChild(row);
                 });
             } catch (error) {
@@ -172,7 +195,7 @@
             }
         };
         hienThiLsu();
-        setInterval(hienThiLsu, 500);
+        // setInterval(hienThiLsu, 500);
     
     </script>
 </body>

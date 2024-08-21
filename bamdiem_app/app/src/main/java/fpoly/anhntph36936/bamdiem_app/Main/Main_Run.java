@@ -9,13 +9,23 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 import fpoly.anhntph36936.bamdiem_app.API.HOSTAPI;
 import fpoly.anhntph36936.bamdiem_app.Model.thidauModel;
 import fpoly.anhntph36936.bamdiem_app.R;
+import okhttp3.OkHttp;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.ResponseBody;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,6 +47,7 @@ public class Main_Run extends AppCompatActivity {
     int minutes, seconds, diem_n1, diem_n2;
     String round = "";
     String id;
+    WebSocket webSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +77,8 @@ public class Main_Run extends AppCompatActivity {
             timeLeftInMillis = initialTimeInMillis;
             updateTimerDisplay(timeLeftInMillis);
         }
+
+        initWebSocket();
 
         btn_huy.setOnClickListener(v -> {
             pauseTimer();
@@ -107,17 +120,21 @@ public class Main_Run extends AppCompatActivity {
                     if (isRunning) {
                         pauseTemporaryTimer();
                         btn_run.setText("Tiếp tục");
+                        sendWebSocketMessage("on");
                     } else {
                         startTemporaryTimer(previousTimeInMillis);
                         btn_run.setText("Dừng");
+                        sendWebSocketMessage("off");
                     }
                 } else {
                     if (isRunning) {
                         pauseTimer();
                         btn_run.setText("Tiếp tục");
+                        sendWebSocketMessage("on");
                     } else {
                         startTimer();
                         btn_run.setText("Dừng");
+                        sendWebSocketMessage("off");
                     }
                 }
             }
@@ -133,6 +150,9 @@ public class Main_Run extends AppCompatActivity {
                 timeLeftInMillis = millisUntilFinished;
                 updateTimerDisplay(timeLeftInMillis);
                 updateClock(id);
+                sendWebSocketTime("updateTime", minutes, seconds);
+                Log.d("TimerCheck", "Minutes: " + minutes + " Seconds: " + seconds);
+
             }
             @Override
             public void onFinish() {
@@ -153,6 +173,9 @@ public class Main_Run extends AppCompatActivity {
                 previousTimeInMillis = millisUntilFinished;
                 updateTimerDisplay(previousTimeInMillis);
                 updateClock(id);
+                sendWebSocketTime("updateTime", minutes, seconds);
+                Log.d("TimerCheck", "Minutes: " + minutes + " Seconds: " + seconds);
+
             }
 
             @Override
@@ -193,6 +216,7 @@ public class Main_Run extends AppCompatActivity {
             temporaryCountDownTimer.cancel();
         }
         isTemporaryTimerRunning = false;
+        sendWebSocketMessage("off");
     }
 
     private void updateTimerDisplay(long millisUntilFinished) {
@@ -260,4 +284,96 @@ public class Main_Run extends AppCompatActivity {
             }
         });
     }
+    private void sendWebSocketMessage(String action) {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("action", action);
+            if (webSocket != null) {
+                webSocket.send(jsonObject.toString());
+                Log.d("WebSocket", "Sent: " + jsonObject.toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initWebSocket() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                .build();
+
+        Request request = new Request.Builder()
+                .url("ws://" + HOSTAPI.HOST + "/ws")
+                .build();
+
+        webSocket = client.newWebSocket(request, new WebSocketListener() {
+
+            @Override
+            public void onOpen(WebSocket webSocket, okhttp3.Response response) {
+                Log.d("WebSocket", "Connected");
+                Log.d("WebSocket", "Response: " + response.toString());
+            }
+
+            @Override
+            public void onMessage(WebSocket webSocket, String text) {
+                Log.d("WebSocket", "Received: " + text);
+                try {
+                    JSONObject data = new JSONObject(text);
+                    if (data.has("action")) {
+                        String action = data.getString("action");
+                        runOnUiThread(() -> {
+                            switch (action) {
+                                case "updateTime":
+                                    if (data.has("minute") && data.has("second")) {
+                                        int minute = data.optInt("minute", 0);
+                                        int second = data.optInt("second", 0);
+                                        updateTimerDisplay((minute * 60 + second) * 1000);
+                                        Log.d("WebSocket", "Updated Minute: " + minute + " Second: " + second);
+                                    }
+                                    break;
+                            }
+                        });
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+            @Override
+            public void onFailure(WebSocket webSocket, Throwable t, okhttp3.Response response) {
+                Log.e("WebSocket", "Error: " + t.getMessage());
+                t.printStackTrace(); // In chi tiết lỗi
+                if (response != null) {
+                    Log.e("WebSocket", "Response: " + response.message());
+                }
+            }
+
+            @Override
+            public void onClosing(WebSocket webSocket, int code, String reason) {
+                webSocket.close(code, reason);
+                Log.d("WebSocket", "Closing: " + reason);
+            }
+
+            @Override
+            public void onClosed(WebSocket webSocket, int code, String reason) {
+                Log.d("WebSocket", "Closed: " + reason);
+            }
+        });
+    }
+    private void sendWebSocketTime(String action, int minutes, int seconds) {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("action", action);
+            jsonObject.put("minute", minutes);
+            jsonObject.put("second", seconds);
+            if (webSocket != null) {
+                webSocket.send(jsonObject.toString());
+                Log.d("WebSocket", "SentTime: " + jsonObject.toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

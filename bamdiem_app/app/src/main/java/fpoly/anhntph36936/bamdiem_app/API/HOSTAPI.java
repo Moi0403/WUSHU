@@ -13,7 +13,10 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface HOSTAPI {
-    String DOMAIN = "http://192.168.14.105:3000";
+    String IPV4 = "192.168.1.15";
+    String PORT = "3000";
+    String HOST = IPV4+ ":" +PORT;
+    String DOMAIN = "http://"+HOST;
 
     @GET("/api/list")
     Call<ArrayList<bdiemModel>> getBdiems();
@@ -26,6 +29,8 @@ public interface HOSTAPI {
 
     @PUT("/api/reset/{id}")
     Call<ArrayList<bdiemModel>> reset(@Path("id") String id, @Body bdiemModel model);
+    @PUT("/api/reset/{id}")
+    Call<Void> resetById(@Path("id") String id);
 
     @GET("/api/list_thidau")
     Call<ArrayList<thidauModel>> getDSTD();
