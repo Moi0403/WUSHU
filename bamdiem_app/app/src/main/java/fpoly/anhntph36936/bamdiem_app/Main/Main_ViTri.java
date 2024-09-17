@@ -74,4 +74,9 @@ public class Main_ViTri extends AppCompatActivity {
             }
         });
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        load();
+    }
 }

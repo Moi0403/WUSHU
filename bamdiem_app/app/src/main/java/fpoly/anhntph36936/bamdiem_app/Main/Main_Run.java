@@ -48,7 +48,7 @@ public class Main_Run extends AppCompatActivity {
     String round = "";
     String id;
     WebSocket webSocket;
-
+    boolean soundPlaying = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +87,7 @@ public class Main_Run extends AppCompatActivity {
             seconds = 0;
             round = "Kết thúc -  " + round;
             updateClock(id);
+            sendSoundControlMessage("stopSound");
             finish();
         });
 
@@ -110,6 +111,7 @@ public class Main_Run extends AppCompatActivity {
                 btn_huy.setVisibility(View.VISIBLE);
                 btn_huys.setVisibility(View.GONE);
                 startTimer();
+
             }
         });
 
@@ -120,21 +122,21 @@ public class Main_Run extends AppCompatActivity {
                     if (isRunning) {
                         pauseTemporaryTimer();
                         btn_run.setText("Tiếp tục");
-                        sendWebSocketMessage("on");
+                        sendSoundControlMessage("stopSound");
                     } else {
                         startTemporaryTimer(previousTimeInMillis);
                         btn_run.setText("Dừng");
-                        sendWebSocketMessage("off");
+                        sendSoundControlMessage("playSound");
                     }
                 } else {
                     if (isRunning) {
                         pauseTimer();
                         btn_run.setText("Tiếp tục");
-                        sendWebSocketMessage("on");
+                        sendSoundControlMessage("stopSound");
                     } else {
                         startTimer();
                         btn_run.setText("Dừng");
-                        sendWebSocketMessage("off");
+                        sendSoundControlMessage("playSound");
                     }
                 }
             }
@@ -150,9 +152,9 @@ public class Main_Run extends AppCompatActivity {
                 timeLeftInMillis = millisUntilFinished;
                 updateTimerDisplay(timeLeftInMillis);
                 updateClock(id);
-                sendWebSocketTime("updateTime", minutes, seconds);
-                Log.d("TimerCheck", "Minutes: " + minutes + " Seconds: " + seconds);
-
+                if (millisUntilFinished <= 10000 && millisUntilFinished == 10000) {
+                    sendSoundControlMessage("playSound");
+                }
             }
             @Override
             public void onFinish() {
@@ -173,9 +175,6 @@ public class Main_Run extends AppCompatActivity {
                 previousTimeInMillis = millisUntilFinished;
                 updateTimerDisplay(previousTimeInMillis);
                 updateClock(id);
-                sendWebSocketTime("updateTime", minutes, seconds);
-                Log.d("TimerCheck", "Minutes: " + minutes + " Seconds: " + seconds);
-
             }
 
             @Override
@@ -216,7 +215,7 @@ public class Main_Run extends AppCompatActivity {
             temporaryCountDownTimer.cancel();
         }
         isTemporaryTimerRunning = false;
-        sendWebSocketMessage("off");
+//        sendWebSocketMessage("off");
     }
 
     private void updateTimerDisplay(long millisUntilFinished) {
@@ -284,18 +283,24 @@ public class Main_Run extends AppCompatActivity {
             }
         });
     }
-    private void sendWebSocketMessage(String action) {
+    private void sendSoundControlMessage(String soundAction) {
         try {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("action", action);
+            jsonObject.put("action", "soundControl");
+            jsonObject.put("soundAction", soundAction);
             if (webSocket != null) {
                 webSocket.send(jsonObject.toString());
-                Log.d("WebSocket", "Sent: " + jsonObject.toString());
+                Log.d("WebSocket", "Sent_Main_Run: " + jsonObject.toString());
+            } else {
+                Log.d("WebSocket", "WebSocket is null. Cannot send message.");
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
+
+
+
 
     private void initWebSocket() {
         OkHttpClient client = new OkHttpClient.Builder()
@@ -310,29 +315,22 @@ public class Main_Run extends AppCompatActivity {
 
             @Override
             public void onOpen(WebSocket webSocket, okhttp3.Response response) {
-                Log.d("WebSocket", "Connected");
-                Log.d("WebSocket", "Response: " + response.toString());
+                Log.d("WebSocket_Main_Run", "Connected");
             }
 
             @Override
             public void onMessage(WebSocket webSocket, String text) {
-                Log.d("WebSocket", "Received: " + text);
                 try {
-                    JSONObject data = new JSONObject(text);
-                    if (data.has("action")) {
-                        String action = data.getString("action");
-                        runOnUiThread(() -> {
-                            switch (action) {
-                                case "updateTime":
-                                    if (data.has("minute") && data.has("second")) {
-                                        int minute = data.optInt("minute", 0);
-                                        int second = data.optInt("second", 0);
-                                        updateTimerDisplay((minute * 60 + second) * 1000);
-                                        Log.d("WebSocket", "Updated Minute: " + minute + " Second: " + second);
-                                    }
-                                    break;
-                            }
-                        });
+                    JSONObject jsonObject = new JSONObject(text);
+                    String action = jsonObject.optString("action");
+
+                    if ("soundControl".equals(action)) {
+                        String soundAction = jsonObject.optString("soundAction");
+                        if ("playSound".equals(soundAction)) {
+
+                        } else if ("stopSound".equals(soundAction)) {
+
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -361,18 +359,11 @@ public class Main_Run extends AppCompatActivity {
             }
         });
     }
-    private void sendWebSocketTime(String action, int minutes, int seconds) {
-        try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("action", action);
-            jsonObject.put("minute", minutes);
-            jsonObject.put("second", seconds);
-            if (webSocket != null) {
-                webSocket.send(jsonObject.toString());
-                Log.d("WebSocket", "SentTime: " + jsonObject.toString());
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (webSocket != null) {
+            webSocket.close(1000, "App closed");
         }
     }
 

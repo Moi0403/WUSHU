@@ -15,6 +15,7 @@ const thidauSchema = new mongoose.Schema({
     weight: String,
     group: String,
     sex: String,
+    type: String,
     id_bdiem: { type: Scheme.Types.ObjectId, ref: 'bdiem' },
 });
 const thidauModel = mongoose.model('thidau', thidauSchema);

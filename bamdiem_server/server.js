@@ -47,9 +47,12 @@ wss.on('connection', (ws) => {
 });
 
 let isOn = false;
+let isPlay = false;
 
 wss.on('connection', (ws) => {
     console.log('Client connected');
+
+    ws.send(JSON.stringify(currentData));
 
     ws.on('message', (message) => {
         const data = JSON.parse(message);
@@ -57,16 +60,17 @@ wss.on('connection', (ws) => {
         if (data.action === 'on') {
             isOn = true;
             console.log('Switch turned ON');
-            // Bạn có thể thực hiện hành động gì đó khi chuyển ON
         } else if (data.action === 'off') {
             isOn = false;
             console.log('Switch turned OFF');
-            // Bạn có thể thực hiện hành động gì đó khi chuyển OFF
         } else if (data.action === 'resetAll') {
             // Xử lý khi nhận yêu cầu reset tất cả
+        } else if (data.action === 'playSound'){
+            isPlay = true;
+        } else if (data.action === 'stopSound'){
+            isPlay = false;
         }
 
-        // Gửi trạng thái hiện tại đến tất cả các client kết nối
         wss.clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify({ action: 'statusUpdate', isOn }));
@@ -78,6 +82,7 @@ wss.on('connection', (ws) => {
         console.log('Client disconnected');
     });
 });
+
 
 router.post('/view', (req, res) => {
     currentData = {
@@ -171,6 +176,17 @@ router.put('/updatedo/:id', async (req, res) => {
         bdiem.lichsudo.push(historyEntry);
         bdiem.diemdo = diemdo;
         await bdiem.save();
+        const updateMessage = {
+            action: 'updateScores',
+            vitri: bdiem.vitri,
+            diemdo: bdiem.diemdo,
+            diemxanh: bdiem.diemxanh
+        };        
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(updateMessage));
+            }
+        });
         res.json({ message: 'Cập nhật điểm thành công và lưu lịch sử.', bdiem });
     } catch (error) {
         console.error('Lỗi khi cập nhật:', error);
@@ -192,6 +208,17 @@ router.put('/updatexanh/:id', async (req, res) => {
         bdiem.lichsuxanh.push(historyEntry);
         bdiem.diemxanh = diemxanh;
         await bdiem.save(); 
+        const updateMessage = {
+            action: 'updateScores',
+            vitri: bdiem.vitri,
+            diemdo: bdiem.diemdo,
+            diemxanh: bdiem.diemxanh
+        };        
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(updateMessage));
+            }
+        });
         res.json({ message: 'Cập nhật điểm thành công và lưu lịch sử.', bdiem });
     } catch (error) {
         console.error('Lỗi khi cập nhật:', error);

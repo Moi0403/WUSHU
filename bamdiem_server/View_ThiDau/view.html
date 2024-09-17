@@ -9,8 +9,10 @@
 <body>
     <div class="container">
         <div class="hear">
+            <button id="playSoundBtn">Play Sound</button>
+            <button id="stopSoundBtn">Stop Sound</button>
             <h1 id="round">Chưa bắt đầu</h1>
-
+            
             <div class="banner">
 
                 <div class="name">
@@ -57,80 +59,80 @@
         const host = config;
         const socket = new WebSocket(`ws://${config.host}:${config.port}`);
 
-        const sound = new Audio(`../Sound/10s.mp3`);
+        const sound = new Audio(`../Sound/sound_wushu.mp3`);
         const soundEnd = new Audio(`../Sound/endSound.mp3`);
         sound.volume = 1.0;
+        let soundPlaying = false;
 
+
+        // document.getElementById('playSoundBtn').addEventListener('click', () => {
+        //     sound.play().catch(error => console.error("Error playing sound: ", error));
+        //     soundPlaying = true        });
+
+        // document.getElementById('stopSoundBtn').addEventListener('click', () => {
+        //     sound.pause();
+        //     sound.currentTime = 0;
+        //     soundPlaying = false;
+        // });
         socket.onopen = function() {
             console.log('WebSocket connection opened');
         };
 
         socket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            console.log("Received data: ", data);
+                const data = JSON.parse(event.data);
+                console.log("Received data: ", data);
 
-            if (data.action === 'statusUpdate') {
-                console.log("Status Update Action Received: ", data.isOn);
-                return;
-            }
+                switch (data.action) {
+                    case 'statusUpdate':
+                        console.log("Status Update Action Received: ", data.isOn);
+                        break;
 
-             if (data.action === 'resetAll') {
-                document.getElementById('round').textContent = 'Chưa bắt đầu';
-                document.getElementById('name_n1').textContent = 'Giáp đỏ';
-                document.getElementById('province_n1').textContent = 'Đơn vị';
-                document.getElementById('name_n2').textContent = 'Giáp xanh';
-                document.getElementById('province_n2').textContent = 'Đơn vị';
-                document.getElementById('time').textContent = '00:00';
-                document.getElementById('diem_n1').textContent = '0';
-                document.getElementById('diem_n2').textContent = '0';
-                hienThiLsu();
-                return;
-            }
+                    case 'resetAll':
+                        document.getElementById('round').textContent = 'Chưa bắt đầu';
+                        document.getElementById('name_n1').textContent = 'Giáp đỏ';
+                        document.getElementById('province_n1').textContent = 'Đơn vị';
+                        document.getElementById('name_n2').textContent = 'Giáp xanh';
+                        document.getElementById('province_n2').textContent = 'Đơn vị';
+                        document.getElementById('time').textContent = '00:00';
+                        document.getElementById('diem_n1').textContent = '0';
+                        document.getElementById('diem_n2').textContent = '0';
+                        hienThiLsu();
+                        break;
 
-                if (data.minute !== undefined && data.second !== undefined) {
-                    console.log("Minute: ", data.minute, "Second: ", data.second);
-                    document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
-                    
-                    if (data.minute === 0 && data.second === 10) {
-                        sound.play().then(() => {
-                            console.log("Sound played successfully");
-                        }).catch(error => {
-                            console.error("Error playing sound: ", error);
-                        });
-                    } else if(data.minute === 0 && data.second === 0) {
-                        soundEnd.play().then(() => {
-                            console.log("Sound played successfully");
-                        }).catch(error => {
-                            console.error("Error playing sound: ", error);
-                        });
-                    }
-                } else {
-                    if (data.round !== undefined) {
-                        document.getElementById('round').textContent = data.round;
-                    }
-                    if (data.name_n1 !== undefined) {
-                        document.getElementById('name_n1').textContent = data.name_n1;
-                    }
-                    if (data.province_n1 !== undefined) {
-                        document.getElementById('province_n1').textContent = data.province_n1;
-                    }
-                    if (data.name_n2 !== undefined) {
-                        document.getElementById('name_n2').textContent = data.name_n2;
-                    }
-                    if (data.province_n2 !== undefined) {
-                        document.getElementById('province_n2').textContent = data.province_n2;
-                    }
-                    if (data.minute !== undefined && data.second !== undefined) {
-                        document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
-                    }
-                    if (data.diem_n1 !== undefined) {
-                        document.getElementById('diem_n1').textContent = data.diem_n1;
-                    }
-                    if (data.diem_n2 !== undefined) {
-                        document.getElementById('diem_n2').textContent = data.diem_n2;
-                    }
+                    case 'playSound':
+                        console.log("Playing sound");
+                        sound.play().catch(error => console.error("Error playing sound: ", error));
+                        soundPlaying = true;
+                        break;
+
+                    case 'stopSound':
+                        console.log("Stopping sound");
+                        sound.pause();
+                        sound.currentTime = 0;
+                        soundPlaying = false;
+                        break;
+
+                    default:
+                        if (data.round) document.getElementById('round').textContent = data.round;
+                        if (data.name_n1) document.getElementById('name_n1').textContent = data.name_n1;
+                        if (data.province_n1) document.getElementById('province_n1').textContent = data.province_n1;
+                        if (data.name_n2) document.getElementById('name_n2').textContent = data.name_n2;
+                        if (data.province_n2) document.getElementById('province_n2').textContent = data.province_n2;
+                        if (data.minute !== undefined && data.second !== undefined) {
+                            document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
+                            if (data.minute === 0 && data.second === 10) {
+                                if (!soundPlaying) {
+                                    sound.play().catch(error => console.error("Error playing sound: ", error));
+                                    soundPlaying = true;
+                                }
+                            }
+                        }
+                        if (data.diem_n1 !== undefined) document.getElementById('diem_n1').textContent = data.diem_n1;
+                        if (data.diem_n2 !== undefined) document.getElementById('diem_n2').textContent = data.diem_n2;
+                        break;
                 }
-        };
+};
+
 
         socket.onerror = function(error) {
             console.log('WebSocket Error: ' + error);
@@ -189,13 +191,13 @@
                     row.appendChild(spacingCell);
                     row.appendChild(tdKetQua);
                     tbody.appendChild(row);
-                });
+                });b
             } catch (error) {
                 console.error('Error:', error);
             }
         };
         hienThiLsu();
-        // setInterval(hienThiLsu, 500);
+        setInterval(hienThiLsu, 500);
     
     </script>
 </body>

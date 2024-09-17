@@ -11,6 +11,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +48,7 @@ public class Main_BamGio extends AppCompatActivity {
     int diem_n1;
     int diem_n2;
     String itemId;
+    boolean play;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,7 +88,6 @@ public class Main_BamGio extends AppCompatActivity {
             }
         }
 
-        initWebSocket();
 
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -183,7 +184,7 @@ public class Main_BamGio extends AppCompatActivity {
         btn_1p30s.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleButtonClickTime(btn_1p30s, 00, 15);
+                handleButtonClickTime(btn_1p30s, 01, 30);
             }
         });
 
@@ -359,7 +360,28 @@ public class Main_BamGio extends AppCompatActivity {
 
             @Override
             public void onMessage(WebSocket webSocket, String text) {
-                Log.d("WebSocket", "Received: " + text);
+                Log.d("WebSocket", "Message received: " + text);
+
+                try {
+                    JSONObject jsonObject = new JSONObject(text);
+                    if (jsonObject.has("action")) {
+                        String action = jsonObject.getString("action");
+                        Log.d("WebSocket", "Action Sound: " + action);
+                        switch (action) {
+                            case "playSound":
+                                Toast.makeText(Main_BamGio.this, "Playing sound", Toast.LENGTH_SHORT).show();
+                                break;
+                            case "stopSound":
+                                Toast.makeText(Main_BamGio.this, "Stopping sound", Toast.LENGTH_SHORT).show();
+                                break;
+                            default:
+                                Log.d("WebSocket", "Unknown action: " + action);
+                                break;
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
