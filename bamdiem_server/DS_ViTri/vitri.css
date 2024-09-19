@@ -226,3 +226,6 @@ input:checked + .slider:before {
 .tsx{
     color: blue;
 }
+#round{
+    text-align: center;
+}

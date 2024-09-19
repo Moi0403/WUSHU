@@ -165,11 +165,13 @@ public class Main_BamDiem extends AppCompatActivity {
                 handlerd.removeCallbacksAndMessages(null);
                 handlerd.removeCallbacks(saveDiemDo);
                 saveDiemDo = () -> {
-                    diemdo += tempDiemdo;
-                    updateDo(id, diemdo);
-                    tempDiemdo = 0;
-                    count_d = 0;
-                    tv_d.setText(String.valueOf(diemdo));
+                    if (diemdo >0){
+                        diemdo += tempDiemdo;
+                        updateDo(id, diemdo);
+                        tempDiemdo = 0;
+                        count_d = 0;
+                        tv_d.setText(String.valueOf(diemdo));
+                    }
                 };
                 handlerd.postDelayed(saveDiemDo, timed);
             }
@@ -189,11 +191,13 @@ public class Main_BamDiem extends AppCompatActivity {
                 saveDiemXanh = new Runnable() {
                     @Override
                     public void run() {
-                        diemxanh += tempDiemxanh;
-                        updateDiemXanh(id, diemxanh);
-                        tempDiemxanh = 0;
-                        count_x = 0;
-                        tv_x.setText(String.valueOf(diemxanh));
+                        if (diemxanh >0){
+                            diemxanh += tempDiemxanh;
+                            updateDiemXanh(id, diemxanh);
+                            tempDiemxanh = 0;
+                            count_x = 0;
+                            tv_x.setText(String.valueOf(diemxanh));
+                        }
                     }
                 };
                 handlerx.postDelayed(saveDiemXanh, timex);

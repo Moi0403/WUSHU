@@ -45,6 +45,9 @@ socket.onmessage = function(event) {
             }
         }
     }else {
+        if (data.round !== undefined) {
+            document.getElementById('round').textContent = data.round;
+        }
         if (data.name_n1 !== undefined) {
             document.getElementById('name_n1').textContent = data.name_n1;
         }
@@ -137,7 +140,7 @@ const hienThi = async () => {
             const btnReset = document.createElement('button');
             btnReset.textContent = 'Reset';
             btnReset.classList.add('btn', 'btn-secondary', 'btn_reset', 'btn_xoa');
-            btnReset.addEventListener('click', async () => {  
+            btnReset.addEventListener('pointerdown', async () => {  
                 const res = confirm(`Do you want to reset position ${item.vitri} ?`);
                 if (res) {
                     try {
@@ -161,7 +164,7 @@ const hienThi = async () => {
             const btnXoa = document.createElement('button');
             btnXoa.textContent = 'Remove';
             btnXoa.classList.add('btn', 'btn-dark', 'btn_xoa');
-            btnXoa.addEventListener('click', async () => {  
+            btnXoa.addEventListener('pointerdown', async () => {  
                 try {
                     const conf = confirm(`Do you want to delete this position ${item.vitri} ?`);
                     if (conf) {
@@ -186,7 +189,7 @@ const hienThi = async () => {
             const btnTangd= document.createElement('button');
             btnTangd.textContent = '+';
             btnTangd.classList.add('btn', 'btn-danger', 'btn_xoa');
-            btnTangd.addEventListener('click', async () => {
+            btnTangd.addEventListener('pointerdown', async () => {
                 const newScoreTD = item.diemdo + 1;
                     try {
                         await fetch(`http://${config.host}:${config.port}/api/updatedo/${item._id}`, {
@@ -203,7 +206,7 @@ const hienThi = async () => {
             const btnGiamd= document.createElement('button');
             btnGiamd.textContent = '-';
             btnGiamd.classList.add('btn', 'btn-danger', 'btn_xoa');
-            btnGiamd.addEventListener('click', async () => {
+            btnGiamd.addEventListener('pointerdown', async () => {
                 let newScoreGD = item.diemdo - 1;
                 if (newScoreGD >= 0) {
                     try {
@@ -216,15 +219,13 @@ const hienThi = async () => {
                         console.error('Error updating red score:', error);
                     }
                                 
-                } else{
-                    alert('Không giảm được nữa !!');
                 }
             });
             
             const btnTangx= document.createElement('button');
             btnTangx.textContent = '+';
             btnTangx.classList.add('btn', 'btn-primary', 'btn_xoa');
-            btnTangx.addEventListener('click', async () => {
+            btnTangx.addEventListener('pointerdown', async () => {
                 const newScoreTX = item.diemxanh + 1;
                     try {
                         await fetch(`http://${config.host}:${config.port}/api/updatexanh/${item._id}`, {
@@ -240,7 +241,7 @@ const hienThi = async () => {
                 const btnGiamx= document.createElement('button');
                 btnGiamx.textContent = '-';
                 btnGiamx.classList.add('btn', 'btn-primary', 'btn_xoa');
-                btnGiamx.addEventListener('click', async () => {
+                btnGiamx.addEventListener('pointerdown', async () => {
                     let newScoreGX = item.diemxanh - 1;
                     if (newScoreGX >= 0) {
                         try {
@@ -253,8 +254,6 @@ const hienThi = async () => {
                             console.error('Error updating red score:', error);
                         }
                                     
-                    } else{
-                        alert('Không giảm được nữa !!');
                     }
                 });    
 
@@ -458,15 +457,15 @@ const updatePromises = data.map(async (item) => {
         },
         body: JSON.stringify({ diemdo: newRedScore }),
     });
-});
+    });
 
 
-await Promise.all(updatePromises);
+    await Promise.all(updatePromises);
 
-} catch (error) {
-console.error('Fetch error:', error);
-}
-});
+    } catch (error) {
+    console.error('Fetch error:', error);
+    }
+    });
 
 document.getElementById('giamdAll').addEventListener('click', async () => {
 try {
@@ -585,7 +584,7 @@ document.addEventListener("keydown", function(event) {
             checkbox.dispatchEvent(new Event('change')); 
         }
     }
-    if (event.code === "Delete"){
+    if (event.code === "Backspace"){
         event.preventDefault();
         const resetAll = document.getElementById('resetAllBtn');
         if (resetAll) {
@@ -620,4 +619,70 @@ document.addEventListener("keydown", function(event) {
             giamxAll.dispatchEvent(new Event('click'));
         }
     }
+    if (event.code === 'KeyE') {
+        event.preventDefault();
+        const Ex = document.getElementById('exportBtn');
+        if (Ex) {
+            Ex.dispatchEvent(new Event('click'));
+        }
+    }
 });
+
+function exportToExcel() {
+    const wb = XLSX.utils.book_new();
+    const data = [
+        ["Round", "Red", "Province-Red", "Point-Red", "Blue", "Province-Blue", "Point-Blue", "Time"],
+        [
+            document.getElementById('round').innerText,
+            document.getElementById('name_n1').innerText, 
+            document.getElementById('province_n1').innerText,
+            document.getElementById('diem_n1').innerText,
+            document.getElementById('name_n2').innerText,
+            document.getElementById('province_n2').innerText,
+            document.getElementById('diem_n2').innerText,
+            document.getElementById('time').innerText
+        ],
+        [],
+        ["Judge", "Red", "Operation-red", "Blue", "Operation-Blue", "Result"]
+    ];
+
+    document.querySelectorAll('#tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        console.log(cells);
+        const rowData = Array.from(cells, cell => cell.innerText);
+    
+        const operationRedElement = cells[3]?.querySelector('.lichsu-do');
+        const operationBlueElement = cells[3]?.querySelector('.lichsu-xanh');
+        
+        const operationRedText = operationRedElement ? operationRedElement.innerText : '';
+        const operationBlueText = operationBlueElement ? operationBlueElement.innerText : '';
+    
+        const redScore = parseInt(rowData[1], 10);
+        const blueScore = parseInt(rowData[2], 10);
+    
+        const result = redScore > blueScore ? 'Red' : blueScore > redScore ? 'Blue' : 'Draw';
+    
+        data.push([
+            rowData[0], 
+            redScore,   
+            operationRedText,
+            blueScore,   
+            operationBlueText,
+            result      
+        ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    ws['!cols'] = data[0].map((_, index) => ({
+        wch: Math.max(...data.map(row => (row[index] || '').toString().length)) + 2
+    }));
+
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, `${document.getElementById('round').innerText || 'data'}.xlsx`);
+}
+
+document.getElementById('exportBtn').addEventListener('click', function () {
+    exportToExcel();
+});
+
