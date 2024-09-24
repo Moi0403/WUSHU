@@ -1,85 +1,6 @@
 const host = config;
 let currentAction = '';
 
-const socket = new WebSocket(`ws://${config.host}:${config.port}`);
-
-socket.onopen = function() {
-    console.log('WebSocket connection opened');
-};
-
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    console.log("Received data: ", data);
-
-    if (data.action === 'statusUpdate') {
-        console.log("Status Update Action Received: ", data.isOn);
-        return;
-    }
-
-    if (data.action === 'resetAll') {
-        document.getElementById('round').textContent = 'Chưa bắt đầu';
-        document.getElementById('name_n1').textContent = 'Giáp đỏ';
-        document.getElementById('province_n1').textContent = 'Đơn vị';
-        document.getElementById('name_n2').textContent = 'Giáp xanh';
-        document.getElementById('province_n2').textContent = 'Đơn vị';
-        document.getElementById('time').textContent = '00:00';
-        document.getElementById('diem_n1').textContent = '0';
-        document.getElementById('diem_n2').textContent = '0';
-        hienThi();
-        return;
-    }
-
-    if (data.action === 'updateTime') {
-        console.log("Received updateTime action: ");
-        if (data.minute !== undefined && data.second !== undefined) {
-            console.log("Minute: ", data.minute, "Second: ", data.second);
-            document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
-            
-            if (data.minute === 0 && data.second === 10) {
-                console.log("10 giây còn lại - Phát âm thanh!");
-                sound.play().then(() => {
-                    console.log("Sound played successfully");
-                }).catch(error => {
-                    console.error("Error playing sound: ", error);
-                });
-            }
-        }
-    }else {
-        if (data.round !== undefined) {
-            document.getElementById('round').textContent = data.round;
-        }
-        if (data.name_n1 !== undefined) {
-            document.getElementById('name_n1').textContent = data.name_n1;
-        }
-        if (data.province_n1 !== undefined) {
-            document.getElementById('province_n1').textContent = data.province_n1;
-        }
-        if (data.name_n2 !== undefined) {
-            document.getElementById('name_n2').textContent = data.name_n2;
-        }
-        if (data.province_n2 !== undefined) {
-            document.getElementById('province_n2').textContent = data.province_n2;
-        }
-        if (data.minute !== undefined && data.second !== undefined) {
-            document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
-        }
-        if (data.diem_n1 !== undefined) {
-            document.getElementById('diem_n1').textContent = data.diem_n1;
-        }
-        if (data.diem_n2 !== undefined) {
-            document.getElementById('diem_n2').textContent = data.diem_n2;
-        }
-    }
-};
-
-socket.onerror = function(error) {
-    console.log('WebSocket Error: ' + error);
-};
-
-socket.onclose = function() {
-    console.log('WebSocket connection closed');
-};
-
 const hienThi = async () => {
     const tbody = document.querySelector('#tbody');
 
@@ -376,68 +297,124 @@ document.getElementById('resetAllBtn').addEventListener('click', async () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-const savedState = localStorage.getItem('toggleState');
-const checkbox = document.getElementById('onoff');
+    const savedState = localStorage.getItem('toggleState');
+    const checkbox = document.getElementById('onoff');
 
-if (savedState === 'on') {
-    checkbox.checked = true;
-} else if (savedState === 'off') {
-    checkbox.checked = false;
-}
-
-const host = config.host;
-const port = config.port;
-const webSocket = new WebSocket(`ws://${host}:${port}/ws`);
-
-webSocket.onopen = () => {
-    console.log('WebSocket is connected.');
-};
-
-webSocket.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-    console.log('Received message:', message);
-
-    if (message.action === 'resetAll') {
-        console.log('Reset all points.');
+    if (savedState === 'on') {
+        checkbox.checked = true;
+    } else if (savedState === 'off') {
+        checkbox.checked = false;
     }
-    if (message.action === 'statusUpdate') {
-        const isOn = message.isOn;
-        const checkbox = document.getElementById('onoff');
-        if (checkbox) {
-            checkbox.checked = isOn;
-        }
-    }
-    if (message.action === 'updateScores') {
-        document.querySelectorAll('#tbody tr').forEach(row => {
-            if (row.querySelector('.vitri').textContent === data.vitri) {
-                row.querySelector('.diemdo').textContent = data.diemdo;
-                row.querySelector('.diemxanh').textContent = data.diemxanh;
+
+    const host = config.host;
+    const port = config.port;
+    const webSocket = new WebSocket(`ws://${host}:${port}/ws`);
+
+    webSocket.onopen = () => {
+        console.log('WebSocket is connected.');
+    };
+
+    webSocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("Received data: ", data);
+
+        if (data.action === 'statusUpdate') {
+            console.log("Status Update Action Received: ", data.isOn);
+            const isOn = data.isOn;
+            const checkbox = document.getElementById('onoff');
+            if (checkbox) {
+                checkbox.checked = isOn;
             }
-        });
-    }
-};
+        }
 
-webSocket.onclose = () => {
-    console.log('WebSocket connection closed. Attempting to reconnect...');
-    setTimeout(() => {
-        webSocket = new WebSocket(`ws://${host}:${port}/ws`);
-    }, 5000); 
-};
+        if (data.action === 'resetAll') {
+            console.log('Reset all points.');
+            document.getElementById('round').textContent = 'Chưa bắt đầu';
+            document.getElementById('name_n1').textContent = 'Giáp đỏ';
+            document.getElementById('province_n1').textContent = 'Đơn vị';
+            document.getElementById('name_n2').textContent = 'Giáp xanh';
+            document.getElementById('province_n2').textContent = 'Đơn vị';
+            document.getElementById('time').textContent = '00:00';
+            document.getElementById('diem_n1').textContent = '0';
+            document.getElementById('diem_n2').textContent = '0';
+            hienThi();
+            return;
+        }
 
-webSocket.onerror = (error) => {
-    console.error('WebSocket error:', error);
-};
+        if (data.action === 'updateTime') {
+            console.log("Received updateTime action: ");
+            if (data.minute !== undefined && data.second !== undefined) {
+                console.log("Minute: ", data.minute, "Second: ", data.second);
+                document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
+                
+                if (data.minute === 0 && data.second === 10) {
+                    console.log("10 giây còn lại - Phát âm thanh!");
+                    sound.play().then(() => {
+                        console.log("Sound played successfully");
+                    }).catch(error => {
+                        console.error("Error playing sound: ", error);
+                    });
+                }
+            }
+        }
 
-document.getElementById('onoff').addEventListener('change', (event) => {
-    const isChecked = event.target.checked;
-    localStorage.setItem('toggleState', isChecked ? 'on' : 'off');
-    const action = isChecked ? 'on' : 'off';
+        if (data.action === 'updateScores') {
+            document.querySelectorAll('#tbody tr').forEach(row => {
+                if (row.querySelector('.vitri').textContent === data.vitri) {
+                    row.querySelector('.diemdo').textContent = data.diemdo;
+                    row.querySelector('.diemxanh').textContent = data.diemxanh;
+                }
+            });
+        }
 
-    if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-        webSocket.send(JSON.stringify({ action }));
-    }
+        if (data.round !== undefined) {
+            document.getElementById('round').textContent = data.round;
+        }
+        if (data.name_n1 !== undefined) {
+            document.getElementById('name_n1').textContent = data.name_n1;
+        }
+        if (data.province_n1 !== undefined) {
+            document.getElementById('province_n1').textContent = data.province_n1;
+        }
+        if (data.name_n2 !== undefined) {
+            document.getElementById('name_n2').textContent = data.name_n2;
+        }
+        if (data.province_n2 !== undefined) {
+            document.getElementById('province_n2').textContent = data.province_n2;
+        }
+        if (data.minute !== undefined && data.second !== undefined) {
+            document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
+        }
+        if (data.diem_n1 !== undefined) {
+            document.getElementById('diem_n1').textContent = data.diem_n1;
+        }
+        if (data.diem_n2 !== undefined) {
+            document.getElementById('diem_n2').textContent = data.diem_n2;
+        }
+    };
+
+    webSocket.onclose = () => {
+        console.log('WebSocket connection closed. Attempting to reconnect...');
+        setTimeout(() => {
+            webSocket = new WebSocket(`ws://${host}:${port}/ws`);
+        }, 5000);
+    };
+
+    webSocket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+
+    document.getElementById('onoff').addEventListener('change', (event) => {
+        const isChecked = event.target.checked;
+        localStorage.setItem('toggleState', isChecked ? 'on' : 'off');
+        const action = isChecked ? 'on' : 'off';
+    
+        if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+            webSocket.send(JSON.stringify({ action }));
+        }
+    });
 });
-});
+
 
 document.getElementById('tangdAll').addEventListener('click', async () => {
 try {
@@ -584,7 +561,7 @@ document.addEventListener("keydown", function(event) {
             checkbox.dispatchEvent(new Event('change')); 
         }
     }
-    if (event.code === "Backspace"){
+    if (event.code === "Delete"){
         event.preventDefault();
         const resetAll = document.getElementById('resetAllBtn');
         if (resetAll) {

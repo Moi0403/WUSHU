@@ -59,8 +59,14 @@ public class Main_Run extends AppCompatActivity {
         btn_huys = findViewById(R.id.btn_huys);
         btn_run = findViewById(R.id.btn_run);
         btn_10s = findViewById(R.id.btn_10s);
-
         btn_huys.setVisibility(View.GONE);
+
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -81,24 +87,33 @@ public class Main_Run extends AppCompatActivity {
         initWebSocket();
 
         btn_huy.setOnClickListener(v -> {
-            pauseTimer();
-            stopTemporaryTimer();
-            minutes = 0;
-            seconds = 0;
-            round = "Kết thúc -  " + round;
-            updateClock(id);
-            sendSoundControlMessage("stopSound");
-            finish();
+            if (Main_BamDiem.isOnOff()) {
+                Toast.makeText(Main_Run.this, "Không thể tắt khi onoff đang bật", Toast.LENGTH_SHORT).show();
+            } else {
+                // Thực hiện hành động tắt
+                pauseTimer();
+                stopTemporaryTimer();
+                minutes = 0;
+                seconds = 0;
+                round = "Kết thúc -  " + round;
+                updateClock(id);
+                finish();
+            }
         });
+
 
         btn_10s.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pauseTimer();
-                btn_huy.setVisibility(View.GONE);
-                btn_huys.setVisibility(View.VISIBLE);
-                stopTemporaryTimer();
-                startTemporaryTimer(11000);
+                if (Main_BamDiem.isOnOff()) {
+                    Toast.makeText(Main_Run.this, "Không thể tắt khi onoff đang bật", Toast.LENGTH_SHORT).show();
+                } else {
+                    pauseTimer();
+                    btn_huy.setVisibility(View.GONE);
+                    btn_huys.setVisibility(View.VISIBLE);
+                    stopTemporaryTimer();
+                    startTemporaryTimer(11000);
+                }
             }
         });
 
@@ -107,10 +122,14 @@ public class Main_Run extends AppCompatActivity {
         btn_huys.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopTemporaryTimer();
-                btn_huy.setVisibility(View.VISIBLE);
-                btn_huys.setVisibility(View.GONE);
-                startTimer();
+                if (Main_BamDiem.isOnOff()) {
+                    Toast.makeText(Main_Run.this, "Không thể tắt khi onoff đang bật", Toast.LENGTH_SHORT).show();
+                } else {
+                    stopTemporaryTimer();
+                    btn_huy.setVisibility(View.VISIBLE);
+                    btn_huys.setVisibility(View.GONE);
+                    startTimer();
+                }
 
             }
         });
@@ -118,28 +137,32 @@ public class Main_Run extends AppCompatActivity {
         btn_run.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isTemporaryTimerRunning) {
-                    if (isRunning) {
-                        pauseTemporaryTimer();
-                        btn_run.setText("Tiếp tục");
-                        sendSoundControlMessage("stopSound");
+                Log.d("Main_Run", "Checking isOnOff before btn_run click: " + Main_BamDiem.isOnOff());
+
+                if (Main_BamDiem.isOnOff()) {
+                    Toast.makeText(Main_Run.this, "Không thể thao tác khi cấm dùng đang bật", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                    if (isTemporaryTimerRunning) {
+                        if (isRunning) {
+                            pauseTemporaryTimer();
+                            btn_run.setText("Tiếp tục");
+                        } else {
+                            startTemporaryTimer(previousTimeInMillis);
+                            btn_run.setText("Dừng");
+                        }
                     } else {
-                        startTemporaryTimer(previousTimeInMillis);
-                        btn_run.setText("Dừng");
-                        sendSoundControlMessage("playSound");
-                    }
-                } else {
-                    if (isRunning) {
-                        pauseTimer();
-                        btn_run.setText("Tiếp tục");
-                        sendSoundControlMessage("stopSound");
-                    } else {
-                        startTimer();
-                        btn_run.setText("Dừng");
-                        sendSoundControlMessage("playSound");
+                        if (isRunning) {
+                            pauseTimer();
+                            btn_run.setText("Tiếp tục");
+                        } else {
+                            startTimer();
+                            btn_run.setText("Dừng");
+                        }
                     }
                 }
-            }
+
         });
 
         startTimer();
@@ -152,9 +175,9 @@ public class Main_Run extends AppCompatActivity {
                 timeLeftInMillis = millisUntilFinished;
                 updateTimerDisplay(timeLeftInMillis);
                 updateClock(id);
-                if (millisUntilFinished <= 10000 && millisUntilFinished == 10000) {
-                    sendSoundControlMessage("playSound");
-                }
+//                if (millisUntilFinished <= 10000 && millisUntilFinished == 10000) {
+//                    sendSoundControlMessage("playSound");
+//                }
             }
             @Override
             public void onFinish() {
@@ -366,5 +389,6 @@ public class Main_Run extends AppCompatActivity {
             webSocket.close(1000, "App closed");
         }
     }
+
 
 }

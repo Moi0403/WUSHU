@@ -56,8 +56,8 @@ public class Main_BamDiem extends AppCompatActivity {
     Handler handlerx = new Handler();
     Runnable saveDiemDo;
     Runnable saveDiemXanh;
-    int timed = 200;
-    int timex = 200;
+    int timed = 300;
+    int timex = 300;
     boolean isRunning = false;
     private boolean isResetNotificationShown = false;
     private boolean isOnNotificationShown = false;
@@ -68,7 +68,7 @@ public class Main_BamDiem extends AppCompatActivity {
     int count_x = 0;
     int MAX_COUNT = 2;
     private AlertDialog currentDialog;
-    boolean isOn;
+    private static boolean isOnOffOn = false;
 
 
     @SuppressLint("SetTextI18n")
@@ -158,9 +158,15 @@ public class Main_BamDiem extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (diemdo > 0 && count_d < MAX_COUNT) {
-                    tempDiemdo--;
-                    count_d++;
-                    tv_d.setText(String.valueOf(diemdo + tempDiemdo));
+                    if (diemdo + tempDiemdo > 0) {
+                        tempDiemdo--;
+                        count_d++;
+                        tv_d.setText(String.valueOf(diemdo + tempDiemdo));
+                    } else {
+                        tempDiemdo = -diemdo;
+                        count_d++;
+                        tv_d.setText("0");
+                    }
                 }
                 handlerd.removeCallbacksAndMessages(null);
                 handlerd.removeCallbacks(saveDiemDo);
@@ -181,9 +187,15 @@ public class Main_BamDiem extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (diemxanh > 0 && count_x < MAX_COUNT) {
-                    tempDiemxanh--;
-                    count_x++;
-                    tv_x.setText(String.valueOf(diemxanh + tempDiemxanh));
+                    if (diemxanh + tempDiemxanh >0){
+                        tempDiemxanh--;
+                        count_x++;
+                        tv_x.setText(String.valueOf(diemxanh + tempDiemxanh));
+                    } else {
+                        tempDiemxanh = -diemxanh;
+                        count_x++;
+                        tv_x.setText("0");
+                    }
                 }
 
                 handlerx.removeCallbacksAndMessages(null);
@@ -342,11 +354,12 @@ public class Main_BamDiem extends AppCompatActivity {
 
                                 case "statusUpdate":
                                     if (jsonObject.has("isOn")) {
-                                        isOn = jsonObject.optBoolean("isOn", false);
+                                        isOnOffOn = jsonObject.optBoolean("isOn", false);
+//                                        Toast.makeText(Main_BamDiem.this, "isOnOffOn: " + isOnOffOn, Toast.LENGTH_SHORT).show();
                                         if (switchOnOff != null) {
-                                            switchOnOff.setChecked(isOn);
+                                            switchOnOff.setChecked(isOnOffOn);
                                         }
-                                        if (isOn) {
+                                        if (isOnOffOn) {
                                             showDialog("Cấm dùng");
                                         } else {
                                             if (currentDialog != null && currentDialog.isShowing()) {
@@ -450,6 +463,9 @@ public class Main_BamDiem extends AppCompatActivity {
                 .setCancelable(false);
         currentDialog = builder.create();
         currentDialog.show();
+    }
+    public static boolean isOnOff() {
+        return isOnOffOn;
     }
 
 

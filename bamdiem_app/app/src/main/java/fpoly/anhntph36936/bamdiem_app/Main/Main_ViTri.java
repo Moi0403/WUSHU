@@ -5,7 +5,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Main_ViTri extends AppCompatActivity {
 
     RecyclerView rc_vitri;
+    ImageView imv_back;
     ArrayList<bdiemModel> list;
     Vitri_ADT vitriAdt;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -31,9 +35,16 @@ public class Main_ViTri extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_diem);
-
+        imv_back = findViewById(R.id.imv_backVT);
         rc_vitri = findViewById(R.id.rc_vitri);
         swipeRefreshLayout = findViewById(R.id.load_vt);
+
+        imv_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Main_ViTri.this, MainActivity.class));
+            }
+        });
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override

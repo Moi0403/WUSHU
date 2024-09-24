@@ -7,12 +7,14 @@
     app:cardCornerRadius="10dp">
 
     <LinearLayout
+        android:id="@+id/item_vtr"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp">
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_gravity="center"
             android:text="Vị trí:"
             android:textColor="#ff00"
@@ -20,20 +22,14 @@
             android:textStyle="bold" />
         <TextView
             android:id="@+id/tv_vitr"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_gravity="center"
             android:layout_marginLeft="100dp"
             android:text="1"
             android:textSize="20sp"
             android:textStyle="bold" />
-        <ImageView
-            android:id="@+id/imv_vitri"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
-            android:layout_marginLeft="100dp"
-            android:src="@drawable/view" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

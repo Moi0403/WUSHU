@@ -7,7 +7,7 @@
     android:gravity="center"
     android:orientation="vertical"
     tools:context=".Main.MainActivity">
-
+    
     <Button
         android:id="@+id/btn_bamgio"
         android:layout_width="180dp"

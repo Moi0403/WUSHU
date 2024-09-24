@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -67,11 +68,11 @@ public class Vitri_ADT extends RecyclerView.Adapter<Vitri_ADT.VitriHolder> {
 
     public static class VitriHolder extends RecyclerView.ViewHolder{
         TextView tv_vitri;
-        ImageView imv_vitri;
+        LinearLayout imv_vitri;
         public VitriHolder(@NonNull View itemView) {
             super(itemView);
             tv_vitri = itemView.findViewById(R.id.tv_vitr);
-            imv_vitri = itemView.findViewById(R.id.imv_vitri);
+            imv_vitri = itemView.findViewById(R.id.item_vtr);
         }
     }
 }

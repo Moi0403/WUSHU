@@ -5,7 +5,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ public class Main_DSTD extends AppCompatActivity {
 
     SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView rc_dstt;
+    ImageView imv_back;
     ArrayList<thidauModel> list;
     Dstd_ADT dstdAdt;
     @Override
@@ -33,7 +37,15 @@ public class Main_DSTD extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_dstt);
         swipeRefreshLayout = findViewById(R.id.load_td);
+        imv_back = findViewById(R.id.imv_backTD);
         rc_dstt = findViewById(R.id.rc_dstd);
+
+        imv_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Main_DSTD.this, MainActivity.class));
+            }
+        });
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override

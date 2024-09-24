@@ -59,10 +59,10 @@ wss.on('connection', (ws) => {
 
         if (data.action === 'on') {
             isOn = true;
-            console.log('Switch turned ON');
+            // console.log('Switch turned ON');
         } else if (data.action === 'off') {
             isOn = false;
-            console.log('Switch turned OFF');
+            // console.log('Switch turned OFF');
         } else if (data.action === 'resetAll') {
             // Xử lý khi nhận yêu cầu reset tất cả
         } else if (data.action === 'playSound'){
