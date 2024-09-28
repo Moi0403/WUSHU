@@ -1,4 +1,4 @@
-const config = {
-    host: '192.168.1.21',
-    port: '3000'
-};
+    const config = {
+        host: '14.225.206.51',
+        port: '3000'
+    };

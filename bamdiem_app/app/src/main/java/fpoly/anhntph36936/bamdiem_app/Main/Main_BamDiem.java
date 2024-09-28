@@ -6,7 +6,10 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -463,6 +466,14 @@ public class Main_BamDiem extends AppCompatActivity {
                 .setCancelable(false);
         currentDialog = builder.create();
         currentDialog.show();
+        Window window = currentDialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams layoutParams = window.getAttributes();
+            layoutParams.gravity = Gravity.TOP;
+            layoutParams.y = 20;
+            window.setLayout(500, WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setAttributes(layoutParams);
+        }
     }
     public static boolean isOnOff() {
         return isOnOffOn;

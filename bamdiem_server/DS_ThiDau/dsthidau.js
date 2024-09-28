@@ -402,6 +402,11 @@ const host = config;
             groupSelect.addEventListener('change', updateWeightOptions);
         });
 
+        document.getElementById('btn_apk').addEventListener('click', function() {
+            // Liên kết tải xuống trực tiếp từ Google Drive
+            window.location.href = "https://drive.google.com/uc?export=download&id=1FPE6rs8LCvgBNNft4L_t8WNJmRb4MAQ0";
+          });
+
         document.addEventListener("keydown", function(event) {
         if (event.code === "Delete"){
             event.preventDefault();
