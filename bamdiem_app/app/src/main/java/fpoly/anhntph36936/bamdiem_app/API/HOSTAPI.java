@@ -14,7 +14,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface HOSTAPI {
-    String IPV4 = "14.225.206.51";
+    String IPV4 = "103.90.227.108";
     String PORT = "3000";
     String HOST = IPV4+ ":" +PORT;
     String DOMAIN = "http://"+HOST;

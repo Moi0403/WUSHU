@@ -50,7 +50,7 @@ let isOn = false;
 let isPlay = false;
 
 wss.on('connection', (ws) => {
-    console.log('Client connected');
+    // console.log('Client connected');
 
     ws.send(JSON.stringify(currentData));
 
@@ -79,7 +79,7 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('close', () => {
-        console.log('Client disconnected');
+        // console.log('Client disconnected');
     });
 });
 
@@ -135,14 +135,14 @@ router.put('/update-view/:id', (req, res) => {
 app.get('/ds_bdiem', async (req, res) => {
     await mongoose.connect(uri);
     let bdiems = await bdiemModel.find();
-    console.log(bdiems);
+    // console.log(bdiems);
     res.send(bdiems);
 });
 
 app.get('/ds_thidau', async (req, res) => {
     await mongoose.connect(uri);
     let data = await thidauModel.find();
-    console.log(data);
+    // console.log(data);
     res.send(data);
 });
 
@@ -153,13 +153,16 @@ router.get('/list', async (req, res) => {
 });
 
 router.post('/add', async (req, res) => {
-    await mongoose.connect(uri);
     let bdiem = req.body;
-    let kq = await bdiemModel.create(bdiem);
-    console.log(kq);
-    let bdiems = await bdiemModel.find();
-    console.log(bdiems);
-    res.send(bdiems);
+    try {
+        let kq = await bdiemModel.create(bdiem);
+        // console.log('Vị trí mới đã được thêm:', kq);
+        let bdiems = await bdiemModel.find();
+        res.send(bdiems);
+    } catch (error) {
+        console.error('Lỗi khi thêm dữ liệu:', error);
+        res.status(500).send('Lỗi khi thêm dữ liệu');
+    }
 });
 
 router.put('/updatedo/:id', async (req, res) => {
@@ -230,10 +233,10 @@ router.delete('/xoa/:id', async (req, res) => {
     try {
         await mongoose.connect(uri);
         let id = req.params.id;
-        console.log(id);
+        // console.log(id);
         const result = await bdiemModel.deleteOne({ _id: id });
         if (result) {
-            console.log('Xoa thanh cong');
+            // console.log('Xoa thanh cong');
         } else {
             res.send('Xóa không thành công');
         }
@@ -320,7 +323,7 @@ router.get('/list/:id', async (req, res) => {
 router.get('/list_thidau', async (req, res) => {
     await mongoose.connect(uri);
     let data = await thidauModel.find();
-    console.log(data);
+    // console.log(data);
     res.send(data);
 });
 
@@ -329,7 +332,7 @@ router.post('/add_thidau', async (req, res) => {
     let data = req.body;
     let kq = await thidauModel.create(data);
     let data2 = await thidauModel.find();
-    console.log(data2);
+    // console.log(data2);
     res.send(data2);
 });
 

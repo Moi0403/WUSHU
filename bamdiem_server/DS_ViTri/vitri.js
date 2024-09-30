@@ -1,5 +1,6 @@
 const host = config;
 let currentAction = '';
+let isDialogOpen = false;
 
 const hienThi = async () => {
     const tbody = document.querySelector('#tbody');
@@ -233,6 +234,8 @@ const themVitri = () => {
     const formData = new FormData(event.target);
 
     const vitri = formData.get('vitri');
+    // const name = formData.get('tenTT');
+    // const pass = formData.get('passTT');
     const diemdo = 0;
     const diemxanh = 0;
 
@@ -593,10 +596,10 @@ document.addEventListener("keydown", function(event) {
         event.preventDefault();
         const giamAll = document.getElementById('giamxAll');
         if (giamxAll){
-            giamxAll.dispatchEvent(new Event('click'));
+            giamxAll.dispatchEvent(new Event('click'));  
         }
     }
-    if (event.code === 'KeyE') {
+    if (event.ctrlKey && event.code === 'KeyE') {
         event.preventDefault();
         const Ex = document.getElementById('exportBtn');
         if (Ex) {

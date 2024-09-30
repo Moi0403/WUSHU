@@ -404,7 +404,7 @@ const host = config;
 
         document.getElementById('btn_apk').addEventListener('click', function() {
             // Liên kết tải xuống trực tiếp từ Google Drive
-            window.location.href = "https://drive.google.com/uc?export=download&id=1FPE6rs8LCvgBNNft4L_t8WNJmRb4MAQ0";
+            window.location.href = "https://drive.usercontent.google.com/download?id=1Fk56Ms7fg65N0Xat6hy6qhl4EeveXquL&export=download&authuser=0";
           });
 
         document.addEventListener("keydown", function(event) {
