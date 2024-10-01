@@ -11,7 +11,7 @@ const hienThi = async () => {
             throw new Error(`HTTP error! Status: ${api.status}`);
         }
         const data = await api.json();
-        console.log(data);
+        // console.log(data);
 
         
         tbody.innerHTML = '';
@@ -254,7 +254,7 @@ const themVitri = () => {
 
         const data = await response.json();
         alert('Thêm vị trí thành công !');
-        console.log('Vị trí mới đã được thêm:', data);
+        // console.log('Vị trí mới đã được thêm:', data);
 
     } catch (error) {
         console.error('Lỗi khi thêm vị trí mới:', error);
@@ -272,7 +272,7 @@ document.getElementById('resetAllBtn').addEventListener('click', async () => {
                 throw new Error(`HTTP error! Status: ${api.status}`);
             }
             const data = await api.json();
-            console.log(data);
+            // console.log(data);
 
             data.forEach(async (item) => {
                 try {
@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     webSocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log("Received data: ", data);
+        // console.log("Received data: ", data);
 
         if (data.action === 'statusUpdate') {
             console.log("Status Update Action Received: ", data.isOn);
@@ -599,7 +599,7 @@ document.addEventListener("keydown", function(event) {
             giamxAll.dispatchEvent(new Event('click'));  
         }
     }
-    if (event.ctrlKey && event.code === 'KeyE') {
+    if (event.getModifierState('CapsLock')) {
         event.preventDefault();
         const Ex = document.getElementById('exportBtn');
         if (Ex) {

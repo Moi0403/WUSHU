@@ -59,10 +59,10 @@
         const host = config;
         const socket = new WebSocket(`ws://${config.host}:${config.port}`);
 
-        const sound = new Audio(`../Sound/sound_wushu.mp3`);
-        const soundEnd = new Audio(`../Sound/endSound.mp3`);
-        sound.volume = 1.0;
-        let soundPlaying = false;
+        // const sound = new Audio(`../Sound/sound_wushu.mp3`);
+        // const soundEnd = new Audio(`../Sound/endSound.mp3`);
+        // sound.volume = 1.0;
+        // let soundPlaying = false;
 
 
         // document.getElementById('playSoundBtn').addEventListener('click', () => {
@@ -80,7 +80,7 @@
 
         socket.onmessage = function(event) {
                 const data = JSON.parse(event.data);
-                console.log("Received data: ", data);
+                // console.log("Received data: ", data);
 
                 switch (data.action) {
                     case 'statusUpdate':
@@ -100,16 +100,16 @@
                         break;
 
                     case 'playSound':
-                        console.log("Playing sound");
-                        sound.play().catch(error => console.error("Error playing sound: ", error));
-                        soundPlaying = true;
+                        // console.log("Playing sound");
+                        // sound.play().catch(error => console.error("Error playing sound: ", error));
+                        // soundPlaying = true;
                         break;
 
                     case 'stopSound':
-                        console.log("Stopping sound");
-                        sound.pause();
-                        sound.currentTime = 0;
-                        soundPlaying = false;
+                        // console.log("Stopping sound");
+                        // sound.pause();
+                        // sound.currentTime = 0;
+                        // soundPlaying = false;
                         break;
 
                     default:
@@ -121,10 +121,10 @@
                         if (data.minute !== undefined && data.second !== undefined) {
                             document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
                             if (data.minute === 0 && data.second === 10) {
-                                if (!soundPlaying) {
-                                    sound.play().catch(error => console.error("Error playing sound: ", error));
-                                    soundPlaying = true;
-                                }
+                                // if (!soundPlaying) {
+                                //     sound.play().catch(error => console.error("Error playing sound: ", error));
+                                //     soundPlaying = true;
+                                // }
                             }
                         }
                         if (data.diem_n1 !== undefined) document.getElementById('diem_n1').textContent = data.diem_n1;
@@ -150,10 +150,10 @@
                     throw new Error(`HTTP error! Status: ${api.status}`);
                 }
                 const data = await api.json();
-                console.log(data);
+                // console.log(data);
 
                 tbody.innerHTML = '';
-                console.log(data); 
+                // console.log(data); 
 
                 data.forEach((item) => {
                     const row = document.createElement('tr');

@@ -114,7 +114,7 @@ const host = config;
                     throw new Error(`HTTP error! Status: ${api.status}`);
                 }
                 const data = await api.json();
-                console.log(data);
+                // console.log(data);
 
                 // Xóa dữ liệu cũ
                 tbody.innerHTML = '';
@@ -407,19 +407,4 @@ const host = config;
             window.location.href = "https://drive.usercontent.google.com/download?id=1Fk56Ms7fg65N0Xat6hy6qhl4EeveXquL&export=download&authuser=0";
           });
 
-        document.addEventListener("keydown", function(event) {
-        if (event.code === "Delete"){
-            event.preventDefault();
-            const removeAll = document.getElementById('removeAll');
-            if (removeAll) {
-                removeAll.dispatchEvent(new Event('click'));
-            }
-        }
-        if (event.code === "KeyA") {
-            event.preventDefault();
-            const add = document.getElementById('addDSTD');
-            if (add) {
-                add.dispatchEvent(new Event('click'));
-            }
-        }
-});
+    
