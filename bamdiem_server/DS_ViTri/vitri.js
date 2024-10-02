@@ -350,14 +350,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log("Minute: ", data.minute, "Second: ", data.second);
                 document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
                 
-                if (data.minute === 0 && data.second === 10) {
-                    console.log("10 giây còn lại - Phát âm thanh!");
-                    sound.play().then(() => {
-                        console.log("Sound played successfully");
-                    }).catch(error => {
-                        console.error("Error playing sound: ", error);
-                    });
-                }
+                // if (data.minute === 0 && data.second === 10) {
+                //     console.log("10 giây còn lại - Phát âm thanh!");
+                //     sound.play().then(() => {
+                //         console.log("Sound played successfully");
+                //     }).catch(error => {
+                //         console.error("Error playing sound: ", error);
+                //     });
+                // }
             }
         }
 
@@ -564,7 +564,7 @@ document.addEventListener("keydown", function(event) {
             checkbox.dispatchEvent(new Event('change')); 
         }
     }
-    if (event.code === "Delete"){
+    if (event.shiftKey){
         event.preventDefault();
         const resetAll = document.getElementById('resetAllBtn');
         if (resetAll) {
@@ -599,7 +599,7 @@ document.addEventListener("keydown", function(event) {
             giamxAll.dispatchEvent(new Event('click'));  
         }
     }
-    if (event.getModifierState('CapsLock')) {
+    if (event.ctrlKey) {
         event.preventDefault();
         const Ex = document.getElementById('exportBtn');
         if (Ex) {
