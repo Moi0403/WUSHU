@@ -52,7 +52,7 @@ public class Dstd_ADT extends RecyclerView.Adapter<Dstd_ADT.DstdHolder>{
         holder.tv_namen2.setText(model.getName_n2());
         holder.tv_tt.setText(model.getSex()+ " - " +model.getWeight());
 
-        holder.imv_clock.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, Main_BamGio.class);
@@ -73,14 +73,14 @@ public class Dstd_ADT extends RecyclerView.Adapter<Dstd_ADT.DstdHolder>{
 
     public static class DstdHolder extends RecyclerView.ViewHolder {
         TextView tv_stt, tv_namen1, tv_namen2, tv_tt;
-        ImageView imv_clock;
+
         public DstdHolder(@NonNull View itemView) {
             super(itemView);
             tv_stt = itemView.findViewById(R.id.tv_stt);
             tv_namen1 = itemView.findViewById(R.id.tv_namen1);
             tv_namen2 = itemView.findViewById(R.id.tv_namen2);
             tv_tt = itemView.findViewById(R.id.tv_tt);
-            imv_clock = itemView.findViewById(R.id.imv_clock);
+
         }
     }
     private void sendDataToServer(thidauModel model) {

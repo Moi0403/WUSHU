@@ -331,15 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (data.action === 'resetAll') {
-            console.log('Reset all points.');
-            document.getElementById('round').textContent = 'Chưa bắt đầu';
-            document.getElementById('name_n1').textContent = 'Giáp đỏ';
-            document.getElementById('province_n1').textContent = 'Đơn vị';
-            document.getElementById('name_n2').textContent = 'Giáp xanh';
-            document.getElementById('province_n2').textContent = 'Đơn vị';
-            document.getElementById('time').textContent = '00:00';
-            document.getElementById('diem_n1').textContent = '0';
-            document.getElementById('diem_n2').textContent = '0';
+            
             hienThi();
             return;
         }

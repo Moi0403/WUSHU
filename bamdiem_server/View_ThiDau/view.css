@@ -1,12 +1,21 @@
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+
+body {
+    max-width: 100%;
+    overflow-x: hidden; /* Ngăn tràn ngang */
+    font-size: 16px;
+}
+
 html, body {
     width: 100%;
     height: 100%;
+    overflow: hidden;
 }
+
 .container {
     width: 100%;
     height: 100%;
@@ -15,120 +24,132 @@ html, body {
     justify-content: center;
     font-weight: bold;
 }
-.hear{
+
+.hear {
     display: block;
     color: white;
 }
-h1{
+
+/* Điều chỉnh kích thước chữ */
+h1 {
     text-align: center;
-    font-size: 100px;
+    font-size: 5vw; /* Chữ co giãn theo màn hình */
 }
-.dongho{
+
+.name {
     display: flex;
-    flex-direction: row;
-    margin-top: 30px;
-    justify-content: center;
+    justify-content: center; /* Căn giữa toàn bộ */
+    align-items: center; /* Căn giữa theo chiều dọc */
     text-align: center;
+    gap: 10vw;
+    margin: 2vw;
+}
+
+/* Đồng hồ */
+.dongho {
+    flex: 1; /* Giữ đồng hồ gọn lại */
+    display: flex;
+    justify-content: center;
+}
+
+.time {
+    font-size: 6vw;
+}
+.item {
+    text-align: center;
+    flex: 1;
+    flex-direction: column;
     align-items: center;
 }
-.time{
-    font-size: 110px;
-}
-.item{
-    text-align: center;
-}
-.name{
-    display: flex;
-    text-align: center;
-    gap: 100px;
-}
-.name_n1{
-    width: 500px;
-    height: 60px;
-    align-content: center;
-    margin-top: 35px;
-    border-radius: 10px;
-    font-size: 50px;
-    color: rgb(245, 71, 71);
-    
-}.name_n2{
-    width: 500px;
-    height: 60px;
-    align-content: center;
-    border-radius: 10px;
-    margin-top: 35px;
-    font-size: 50px;
-    color: rgb(84, 84, 235);
-}
-.tiso{
-    display: flex;
-    margin-top: 20px;
-    justify-content: center;
-    text-align: center;
-    gap: 150px;
-}
-.vtri{
-    color: rgb(0, 255, 72);
-    font-size: 40px;
-    width: 85px;
-}
-.diemdo{
-    font-size: 200px;
-    color: rgb(245, 71, 71);
-}
-.diemxanh{
-    font-size: 200px;
-    color: rgb(84, 84, 235);
-}
-table {
+
+.name_n1, .name_n2 {
     width: 100%;
-    border-collapse: collapse;
-    border-spacing: 0 15px;
+    height: auto;
+    align-content: center;
+    border-radius: 10px;
+    font-size: 3vw;
 }
-thead{
+
+.name_n1 {
+    color: rgb(245, 71, 71);
+}
+
+.name_n2 {
+    color: rgb(84, 84, 235);
+}
+
+/* Điểm số */
+.tiso {
+    display: flex;
+    justify-content: center;
+    gap: 11vw;
+}
+
+.diemdo, .diemxanh {
+    font-size: 10vw;
+    margin-top: 5vw;
+}
+
+.vtri {
+    color: rgb(0, 255, 72);
+    font-size: 3vw;
+    width: 15%;
+}
+
+/* Lịch sử */
+.lichsu {
+    width: 50%;
+    height: auto;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+}
+
+table {
+    width: auto;
+    border-collapse: collapse;
+    border-spacing: 0 1vw;
+    
+}
+
+thead {
     background-color: rgb(205, 254, 254);
     color: black;
-    font-size: 30px;
+    font-size: 2vw;
 }
-.lichsu {
-    width: 40%;
-    height: 60px;
-    display: flex;
-    text-align: center;
-}
-.lichsu-do {
-    font-size: 60px;
+
+.lichsu-do, .lichsu-xanh {
+    font-size: 4vw;
     font-weight: bold;
-    background-color: red;
-    color: white;
     border: 2px solid white;
 }
 
+.lichsu-do {
+    background-color: red;
+    color: white;
+    width: 35%;
+}
+
 .lichsu-xanh {
-    font-size: 60px;
-    font-weight: bold;
     background-color: blue;
-    color:white;
-    border: 2px solid white;
+    color: white;
+    width: 35%;
 }
-.trong{
-    width: 15px;
-}
-.ketqua{
-    width: 70px;
-    height: 30px;
-    text-align: center;
+
+.ketqua {
+    width: 4.6vw;
     border-radius: 100px;
     justify-content: center;
     align-items: center;
 }
+
 .result-blue {
     background-color: rgb(84, 84, 235);
     color: white;
 }
 
 .result-red {
-    background-color:  rgb(245, 71, 71);
+    background-color: rgb(245, 71, 71);
     color: white;
 }
 
@@ -136,9 +157,12 @@ thead{
     background-image: linear-gradient(to right, rgb(245, 71, 71) 50%, rgb(84, 84, 235) 50%);
     color: white;
 }
-.tdTT{
-    gap: 10px;
-}
+
+
+
+
+
+
 
 
 

@@ -9,8 +9,8 @@
 <body>
     <div class="container">
         <div class="hear">
-            <button id="playSoundBtn">Play Sound</button>
-            <button id="stopSoundBtn">Stop Sound</button>
+            <!-- <button id="playSoundBtn">Play Sound</button>
+            <button id="stopSoundBtn">Stop Sound</button> -->
             <h1 id="round">Chưa bắt đầu</h1>
             
             <div class="banner">
@@ -18,7 +18,7 @@
                 <div class="name">
                     <div class="item">
                         <h2 class="name_n1" id="name_n1">Giáp đỏ</h2>
-                    <h2 class="province_n1" id="province_n1">Đơn vị</h2>
+                        <h2 class="province_n1" id="province_n1">Đơn vị</h2>
                     </div>
 
                     <div class="dongho">
@@ -88,14 +88,7 @@
                         break;
 
                     case 'resetAll':
-                        document.getElementById('round').textContent = 'Chưa bắt đầu';
-                        document.getElementById('name_n1').textContent = 'Giáp đỏ';
-                        document.getElementById('province_n1').textContent = 'Đơn vị';
-                        document.getElementById('name_n2').textContent = 'Giáp xanh';
-                        document.getElementById('province_n2').textContent = 'Đơn vị';
-                        document.getElementById('time').textContent = '00:00';
-                        document.getElementById('diem_n1').textContent = '0';
-                        document.getElementById('diem_n2').textContent = '0';
+                        
                         hienThiLsu();
                         break;
 
