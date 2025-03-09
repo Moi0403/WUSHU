@@ -47,6 +47,10 @@ let currentData = {
 let isOn = false;
 let isPlay = false;
 
+// Buffer để lưu tin nhắn quan trọng
+let messageBuffer = [];
+const MAX_BUFFER_SIZE = 50; // Giới hạn số tin nhắn lưu trong buffer
+
 // Debounce để giới hạn tần suất gửi dữ liệu
 const debounce = (func, wait) => {
     let timeout;
@@ -56,9 +60,14 @@ const debounce = (func, wait) => {
     };
 };
 
-// Hàm broadcast với timestamp để đo độ trễ
+// Hàm broadcast với timestamp và lưu vào buffer
 const broadcastWithTime = debounce((data) => {
     const payload = { ...data, timestamp: Date.now() };
+    // Lưu vào buffer
+    messageBuffer.push(payload);
+    if (messageBuffer.length > MAX_BUFFER_SIZE) {
+        messageBuffer.shift(); // Xóa tin nhắn cũ nếu vượt quá giới hạn
+    }
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(payload));
@@ -71,6 +80,13 @@ wss.on('connection', (ws) => {
     ws.isAlive = true;
     ws.send(JSON.stringify(currentData));
 
+    // Gửi lại các tin nhắn trong buffer cho client mới
+    messageBuffer.forEach(msg => {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(msg));
+        }
+    });
+
     ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
@@ -81,7 +97,6 @@ wss.on('connection', (ws) => {
                 isOn = false;
                 broadcastWithTime({ action: 'statusUpdate', isOn });
             } else if (data.action === 'resetAll') {
-                // Xử lý reset
                 broadcastWithTime({ action: 'resetAll' });
             } else if (data.action === 'playSound') {
                 isPlay = true;
@@ -95,6 +110,7 @@ wss.on('connection', (ws) => {
 
     ws.on('pong', () => ws.isAlive = true);
     ws.on('close', () => console.log('Client disconnected'));
+    ws.on('error', (error) => console.error('WebSocket error:', error));
 });
 
 // Kiểm tra kết nối sống
