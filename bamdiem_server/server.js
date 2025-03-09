@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 
 const COMMON = require('./database/COMMON');
 const bdiemModel = require('./database/bdiemModel');
-const thidauModel = require('./database/thidauModel').default;
+const thidauModel = require('./database/thidauModel');
 
 const app = express();
 const port = 3000;
