@@ -44,46 +44,67 @@ let currentData = {
     diem_n2: 0
 };
 
-wss.on('connection', (ws) => {
-    ws.send(JSON.stringify(currentData));
-});
-
 let isOn = false;
 let isPlay = false;
 
-wss.on('connection', (ws) => {
-    // console.log('Client connected');
+// Debounce để giới hạn tần suất gửi dữ liệu
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+    };
+};
 
+// Hàm broadcast với timestamp để đo độ trễ
+const broadcastWithTime = debounce((data) => {
+    const payload = { ...data, timestamp: Date.now() };
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(payload));
+        }
+    });
+}, 50);
+
+// WebSocket xử lý kết nối
+wss.on('connection', (ws) => {
+    ws.isAlive = true;
     ws.send(JSON.stringify(currentData));
 
     ws.on('message', (message) => {
-        const data = JSON.parse(message);
-
-        if (data.action === 'on') {
-            isOn = true;
-            // console.log('Switch turned ON');
-        } else if (data.action === 'off') {
-            isOn = false;
-            // console.log('Switch turned OFF');
-        } else if (data.action === 'resetAll') {
-            // Xử lý khi nhận yêu cầu reset tất cả
-        } else if (data.action === 'playSound'){
-            isPlay = true;
-        } else if (data.action === 'stopSound'){
-            isPlay = false;
-        }
-
-        wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({ action: 'statusUpdate', isOn }));
+        try {
+            const data = JSON.parse(message);
+            if (data.action === 'on') {
+                isOn = true;
+                broadcastWithTime({ action: 'statusUpdate', isOn });
+            } else if (data.action === 'off') {
+                isOn = false;
+                broadcastWithTime({ action: 'statusUpdate', isOn });
+            } else if (data.action === 'resetAll') {
+                // Xử lý reset
+                broadcastWithTime({ action: 'resetAll' });
+            } else if (data.action === 'playSound') {
+                isPlay = true;
+            } else if (data.action === 'stopSound') {
+                isPlay = false;
             }
-        });
+        } catch (error) {
+            console.error('Lỗi xử lý message WebSocket:', error);
+        }
     });
 
-    ws.on('close', () => {
-        // console.log('Client disconnected');
-    });
+    ws.on('pong', () => ws.isAlive = true);
+    ws.on('close', () => console.log('Client disconnected'));
 });
+
+// Kiểm tra kết nối sống
+setInterval(() => {
+    wss.clients.forEach(ws => {
+        if (!ws.isAlive) return ws.terminate();
+        ws.isAlive = false;
+        ws.ping();
+    });
+}, 10000);
 
 
 router.post('/view', (req, res) => {
