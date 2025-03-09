@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 
 const COMMON = require('./database/COMMON');
 const bdiemModel = require('./database/bdiemModel');
-const thidauModel = require('./database/thidauModel');
+const thidauModel = require('./database/thidauModel').default;
 
 const app = express();
 const port = 3000;
@@ -24,7 +24,9 @@ app.use('/api', router);
 
 const uri = COMMON.uri;
 
-mongoose.connect(uri).then(() => {
+mongoose.connect(uri, {
+    maxPoolSize: 10 // Giữ lại nếu bạn muốn giới hạn connection pool
+}).then(() => {
     console.log('Kết nối MongoDB thành công');
 }).catch(err => {
     console.error('Lỗi kết nối MongoDB:', err);
@@ -133,21 +135,20 @@ router.put('/update-view/:id', (req, res) => {
 
 
 app.get('/ds_bdiem', async (req, res) => {
-    await mongoose.connect(uri);
     let bdiems = await bdiemModel.find();
     // console.log(bdiems);
     res.send(bdiems);
 });
 
 app.get('/ds_thidau', async (req, res) => {
-    await mongoose.connect(uri);
+    // await mongoose.connect(uri);
     let data = await thidauModel.find();
     // console.log(data);
     res.send(data);
 });
 
 router.get('/list', async (req, res) => {
-    await mongoose.connect(uri);
+    // await mongoose.connect(uri);
     let bdiems = await bdiemModel.find();
     res.send(bdiems);
 });
@@ -169,7 +170,7 @@ router.put('/updatedo/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const { diemdo } = req.body;
-        await mongoose.connect(uri);
+        // await mongoose.connect(uri);
         let bdiem = await bdiemModel.findById(id);
         if (!bdiem) {
             return res.status(404).json({ message: 'Không tìm thấy bản ghi' });
@@ -201,7 +202,7 @@ router.put('/updatexanh/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const { diemxanh } = req.body;
-        await mongoose.connect(uri);
+        // await mongoose.connect(uri);
         let bdiem = await bdiemModel.findById(id);
         if (!bdiem) {
             return res.status(404).json({ message: 'Không tìm thấy bản ghi' });
@@ -231,7 +232,7 @@ router.put('/updatexanh/:id', async (req, res) => {
 
 router.delete('/xoa/:id', async (req, res) => {
     try {
-        await mongoose.connect(uri);
+        // await mongoose.connect(uri);
         let id = req.params.id;
         // console.log(id);
         const result = await bdiemModel.deleteOne({ _id: id });
@@ -247,7 +248,7 @@ router.delete('/xoa/:id', async (req, res) => {
 });
 router.put('/reset-all', async (req, res) => {
     try {
-        await mongoose.connect(uri);
+        // await mongoose.connect(uri);
         const result = await bdiemModel.updateMany({}, {
             diemdo: 0,
             diemxanh: 0,
@@ -284,7 +285,7 @@ router.put('/reset/:id', async (req, res) => {
             lichsudo: [],
             lichsuxanh: [],
         };
-        await mongoose.connect(uri);
+        // await mongoose.connect(uri);
         const result = await bdiemModel.findByIdAndUpdate(id, data);
         if (result) {
             res.send('Reset tất cả các điểm thành công');
@@ -321,14 +322,14 @@ router.get('/list/:id', async (req, res) => {
 
 
 router.get('/list_thidau', async (req, res) => {
-    await mongoose.connect(uri);
+    // await mongoose.connect(uri);
     let data = await thidauModel.find();
     // console.log(data);
     res.send(data);
 });
 
 router.post('/add_thidau', async (req, res) => {
-    await mongoose.connect(uri);
+    // await mongoose.connect(uri);
     let data = req.body;
     let kq = await thidauModel.create(data);
     let data2 = await thidauModel.find();
@@ -338,7 +339,7 @@ router.post('/add_thidau', async (req, res) => {
 
 router.delete('/del_thidau/:id', async (req, res) => {
     try {
-        await mongoose.connect(uri);
+        // await mongoose.connect(uri);
         let id = req.params.id;
         console.log(id);
         const result = await thidauModel.deleteOne({ _id: id });
@@ -357,7 +358,7 @@ router.put('/up_thidau/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const data = req.body;
-        await mongoose.connect(uri);
+        // await mongoose.connect(uri);
         const result = await thidauModel.findByIdAndUpdate(id, data);
         if (result) {
             let data = await thidauModel.find();
@@ -374,7 +375,7 @@ router.put('/up_thidau/:id', async (req, res) => {
 
 router.delete('/remove_all', async (req, res) => {
     try {
-        await mongoose.connect(uri);
+        // await mongoose.connect(uri);
         const result = await thidauModel.deleteMany({});
         if (result.deletedCount > 0) {
             res.send({ message: 'Đã xóa tất cả bản ghi thành công' });
