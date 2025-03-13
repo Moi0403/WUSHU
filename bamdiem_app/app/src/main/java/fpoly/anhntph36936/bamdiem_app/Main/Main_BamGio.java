@@ -130,13 +130,13 @@ public class Main_BamGio extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 thidauModel model = new thidauModel();
-                model.setRound("Chờ");
-                model.setName_n1("Giáp đỏ");
-                model.setName_n2("Giáp xanh");
+                model.setRound("CHƯA BẮT ĐẦU");
+                model.setName_n1("GIÁP ĐỎ");
+                model.setName_n2("GIÁP XANH");
                 model.setDiem_n1(0);
                 model.setDiem_n2(0);
-                model.setProvince_n1("Đơn vị");
-                model.setProvince_n2("Đơn vị");
+                model.setProvince_n1("ĐƠN VỊ");
+                model.setProvince_n2("ĐƠN VỊ");
                 sendDataToServer(itemId, model);
                 startActivity(new Intent(Main_BamGio.this, Main_DSTD.class));
             }
@@ -145,7 +145,7 @@ public class Main_BamGio extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 thidauModel model = new thidauModel();
-                model.setRound("Nghỉ giữa hiệp");
+                model.setRound("NGHỈ GIỮA HIỆP");
                 model.setMinute(1);
                 model.setSecond(0);
                 model.setDiem_n1(diem_n1);
@@ -154,7 +154,7 @@ public class Main_BamGio extends AppCompatActivity {
 
                 Intent intent = new Intent(Main_BamGio.this, Main_Run.class);
                 intent.putExtra("id", itemId);
-                intent.putExtra("round", "Nghỉ giữa hiệp");
+                intent.putExtra("round", "NGHỈ GIỮA HIỆP");
                 intent.putExtra("minutes", 1);
                 intent.putExtra("seconds", 0);
                 intent.putExtra("diem_n1", diem_n1);
@@ -172,21 +172,21 @@ public class Main_BamGio extends AppCompatActivity {
         btn_r1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleButtonClick(btn_r1, "Round 1");
+                handleButtonClick(btn_r1, "ROUND 1");
             }
         });
 
         btn_r2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleButtonClick(btn_r2, "Round 2");
+                handleButtonClick(btn_r2, "ROUND 2");
             }
         });
 
         btn_r3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleButtonClick(btn_r3, "Round 3");
+                handleButtonClick(btn_r3, "ROUND 3");
             }
         });
         btn_1p30s.setOnClickListener(new View.OnClickListener() {

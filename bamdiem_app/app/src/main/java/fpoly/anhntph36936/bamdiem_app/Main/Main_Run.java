@@ -95,7 +95,7 @@ public class Main_Run extends AppCompatActivity {
                 stopTemporaryTimer();
                 minutes = 0;
                 seconds = 0;
-                round = "Kết thúc -  " + round;
+                round = "KẾT THÚC -  " + round;
                 updateClock(id);
                 finish();
             }
