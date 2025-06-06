@@ -8,9 +8,16 @@
 </head>
 <body>
     <div class="container">
+        
         <div class="hear">
             <!-- <button id="playSoundBtn">Play Sound</button>
             <button id="stopSoundBtn">Stop Sound</button> -->
+            <div id="dialogRed" class="dialog red"> 
+                <h1>RED</h1>
+            </div>
+            <div id="dialogBlue" class="dialog blue">
+                <h1>BLUE</h1>
+            </div>
             <h1 id="round">Chưa bắt đầu</h1>
             
             <div class="banner">
@@ -191,7 +198,26 @@
         };
         hienThiLsu();
         setInterval(hienThiLsu, 500);
-    
+        
+         let lastState = null;
+
+        setInterval(() => {
+            const state = localStorage.getItem("showDialog");
+            if (state !== lastState) {
+            // Ẩn hết
+            document.getElementById("dialogRed").style.display = "none";
+            document.getElementById("dialogBlue").style.display = "none";
+
+            // Hiện theo màu
+            if (state === "red") {
+                document.getElementById("dialogRed").style.display = "block";
+            } else if (state === "blue") {
+                document.getElementById("dialogBlue").style.display = "block";
+            }
+
+            lastState = state;
+            }
+        }, 300);
     </script>
 </body>
 </html>

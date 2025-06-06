@@ -161,7 +161,23 @@ thead {
     background-image: linear-gradient(to right, rgb(245, 71, 71) 50%, rgb(84, 84, 235) 50%);
     color: white;
 }
-
+.dialog {
+      display: none;
+      padding: 20px;
+      color: white;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 10px;
+      width: 90%;
+      height: 90%;
+    }
+.red { 
+    background-color: red; 
+    text-align: center;
+}
+.blue { background-color: blue; }
 
 
 

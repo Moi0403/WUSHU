@@ -546,6 +546,55 @@ try {
 }
 });
 
+let currentDialog = null;
+
+  const redBtn = document.getElementById("redWin");
+  const blueBtn = document.getElementById("blueWin");
+
+  function updateButtonStyles() {
+    if (currentDialog === "red") {
+      redBtn.classList.remove("btn-outline-danger");
+      redBtn.classList.add("btn-danger");
+
+      blueBtn.classList.remove("btn-primary");
+      blueBtn.classList.add("btn-outline-primary");
+    } else if (currentDialog === "blue") {
+      blueBtn.classList.remove("btn-outline-primary");
+      blueBtn.classList.add("btn-primary");
+
+      redBtn.classList.remove("btn-danger");
+      redBtn.classList.add("btn-outline-danger");
+    } else {
+      redBtn.classList.remove("btn-danger");
+      redBtn.classList.add("btn-outline-danger");
+
+      blueBtn.classList.remove("btn-primary");
+      blueBtn.classList.add("btn-outline-primary");
+    }
+  }
+
+  redBtn.onclick = function () {
+    if (currentDialog === "red") {
+      currentDialog = null;
+      localStorage.setItem("showDialog", "hide");
+    } else {
+      currentDialog = "red";
+      localStorage.setItem("showDialog", "red");
+    }
+    updateButtonStyles();
+  };
+
+  blueBtn.onclick = function () {
+    if (currentDialog === "blue") {
+      currentDialog = null;
+      localStorage.setItem("showDialog", "hide");
+    } else {
+      currentDialog = "blue";
+      localStorage.setItem("showDialog", "blue");
+    }
+    updateButtonStyles();
+  };
+
 document.addEventListener("keydown", function(event) {
     if (event.code === "Space") {
         event.preventDefault();
