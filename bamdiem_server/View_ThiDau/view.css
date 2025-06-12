@@ -8,6 +8,7 @@ body {
     max-width: 100%;
     overflow-x: hidden; /* Ngăn tràn ngang */
     font-size: 16px;
+    overflow: hidden;
 }
 
 html, body {
@@ -28,22 +29,27 @@ html, body {
 .hear {
     display: block;
     color: white;
+    
 }
 
 /* Điều chỉnh kích thước chữ */
 h1 {
     text-align: center;
-    font-size: 6vw; /* Chữ co giãn theo màn hình */
+    font-size: 5vw; /* Chữ co giãn theo màn hình */
     margin: 1vw;
+    margin-top: 3vw;
 }
 
 .name {
+    width: 100%;
     display: flex;
     justify-content: center; /* Căn giữa toàn bộ */
     align-items: center; /* Căn giữa theo chiều dọc */
     text-align: center;
-    gap: 10vw;
+    gap: 11vw;
     margin: 1vw;
+    padding: 1vw;
+    margin-top: 2vw;    
 }
 
 /* Đồng hồ */
@@ -71,7 +77,7 @@ h1 {
     font-size: 3.5vw;
 }
 .province_n1, .province_n2{
-    font-size: 3vw;
+    font-size: 2vw;
 }
 
 .name_n1 {
@@ -84,9 +90,12 @@ h1 {
 
 /* Điểm số */
 .tiso {
+    width: 100%;
+    height: auto;
     display: flex;
     justify-content: center;
-    gap: 11vw;
+    gap: 10vw;
+    margin-top: 2vw;
 }
 
 .diemdo, .diemxanh {
@@ -97,7 +106,7 @@ h1 {
 .vtri {
     color: rgb(0, 255, 72);
     font-size: 3vw;
-    width: 15%;
+    width: 17.5%;
 }
 
 /* Lịch sử */
@@ -107,13 +116,13 @@ h1 {
     display: flex;
     text-align: center;
     flex-direction: column;
+    justify-content: center;
 }
 
 table {
     width: auto;
     border-collapse: collapse;
     border-spacing: 0 1vw;
-    
 }
 
 thead {
