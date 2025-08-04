@@ -192,7 +192,7 @@ public class Main_BamGio extends AppCompatActivity {
         btn_1p30s.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleButtonClickTime(btn_1p30s, 00, 12);
+                handleButtonClickTime(btn_1p30s, 01, 31);
             }
         });
 

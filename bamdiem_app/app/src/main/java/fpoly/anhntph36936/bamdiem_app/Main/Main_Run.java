@@ -247,7 +247,18 @@ public class Main_Run extends AppCompatActivity {
                 tv_run.setText("00:00");
                 btn_run.setText("Tiếp tục");
                 updateClock(id);
-                // Không dừng mediaPlayer để âm thanh chạy hết
+                sendSoundControlMessage("timerFinished");
+                if (id != null) {
+                    thidauModel model = new thidauModel();
+                    model.set_id(id);
+                    model.setRound(round);
+                    model.setDiem_n1(diem_n1);
+                    model.setDiem_n2(diem_n2);
+                    model.setMinute(0);
+                    model.setSecond(0);
+                    updateDT(id, model);
+                    sendDataToServer(id, model);
+                }
             }
         }.start();
 
@@ -417,6 +428,14 @@ public class Main_Run extends AppCompatActivity {
             if (webSocket != null) {
                 webSocket.send(jsonObject.toString());
                 Log.d("WebSocket", "Sent_Main_Run: " + jsonObject.toString());
+                // Gửi thêm syncTimer khi timer kết thúc
+                if ("timerFinished".equals(soundAction)) {
+                    JSONObject syncObject = new JSONObject();
+                    syncObject.put("action", "syncTimer");
+                    syncObject.put("timeLeft", 0); // Gửi 0 khi timer kết thúc
+                    webSocket.send(syncObject.toString());
+                    Log.d("WebSocket", "Sent syncTimer: 0");
+                }
             } else {
                 Log.d("WebSocket", "WebSocket is null. Cannot send message.");
             }
@@ -449,9 +468,16 @@ public class Main_Run extends AppCompatActivity {
 
                     if ("soundControl".equals(action)) {
                         String soundAction = jsonObject.optString("soundAction");
-
                         if ("resetCountdown".equals(soundAction)) {
-
+                            // Xử lý nếu cần
+                        }
+                    } else if ("syncTimer".equals(action)) {
+                        // Nhận thông điệp đồng bộ từ server
+                        long serverTime = jsonObject.optLong("timeLeft", -1);
+                        if (serverTime >= 0) {
+                            timeLeftInMillis = serverTime;
+                            updateTimerDisplay(timeLeftInMillis);
+                            Log.d("WebSocket_Main_Run", "Synced timer from server: " + serverTime);
                         }
                     }
                 } catch (JSONException e) {

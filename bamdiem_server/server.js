@@ -41,7 +41,8 @@ let currentData = {
     minute: 0,
     second: 0,
     diem_n1: 0,
-    diem_n2: 0
+    diem_n2: 0,
+    timeLeft: -1
 };
 
 let isOn = false;
@@ -94,6 +95,11 @@ wss.on('connection', (ws) => {
             } else if (data.action === 'soundControl') {
                 const soundAction = data.soundAction;
                 broadcastWithTime({ action: 'soundControl', soundAction });
+                if (soundAction === 'timerFinished') {
+                    currentData.timeLeft = 0; // Cập nhật trạng thái timer
+                    broadcastWithTime({ action: 'syncTimer', timeLeft: 0 }); // Gửi đồng bộ hóa
+                    console.log('Broadcasted syncTimer with timeLeft: 0');
+                }
             }
         } catch (error) {
             console.error('Lỗi xử lý message WebSocket:', error);
