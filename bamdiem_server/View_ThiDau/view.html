@@ -6,7 +6,7 @@
     <title>VIEW</title>
     <link rel="stylesheet" href="./view.css">
 </head>
-<body>
+<body onclick="initAudio()">
     <div class="container">
         
         <div class="hear">
@@ -66,21 +66,27 @@
         const host = config;
         const socket = new WebSocket(`ws://${config.host}:${config.port}`);
 
-        // const sound = new Audio(`../Sound/sound_wushu.mp3`);
-        // const soundEnd = new Audio(`../Sound/endSound.mp3`);
-        // sound.volume = 1.0;
-        // let soundPlaying = false;
+
+        const countdownSound = new Audio('');
+        countdownSound.volume = 1.0;
+        let countdownPlayed = false;
+
+        let countdownInitialized = false;
+
+        function initAudio() {
+            if (!countdownInitialized) {
+                countdownSound.play().then(() => {
+                    countdownSound.pause();
+                    countdownSound.currentTime = 0;
+                    countdownInitialized = true;
+                    alert("✅ Đã cấp quyền phát âm");
+                }).catch(err => {
+                    console.error("❌ Không cấp được quyền phát âm:", err);
+                });
+            }
+        }
 
 
-        // document.getElementById('playSoundBtn').addEventListener('click', () => {
-        //     sound.play().catch(error => console.error("Error playing sound: ", error));
-        //     soundPlaying = true        });
-
-        // document.getElementById('stopSoundBtn').addEventListener('click', () => {
-        //     sound.pause();
-        //     sound.currentTime = 0;
-        //     soundPlaying = false;
-        // });
         socket.onopen = function() {
             console.log('WebSocket connection opened');
         };
@@ -112,6 +118,30 @@
                         // soundPlaying = false;
                         break;
 
+                   case 'soundControl':
+                        if (data.soundAction === 'resetCountdown') {
+                            countdownPlayed = false;
+                            countdownSound.currentTime = 0;
+                            countdownSound.play().then(() => {
+                                console.log("Phát lại âm thanh resetCountdown");
+                            }).catch(err => console.error("Lỗi phát âm:", err));
+                        } else if (data.soundAction === 'stopSound') {
+                            countdownSound.pause();
+                            countdownSound.currentTime = 0;
+                            countdownPlayed = false;
+                            console.log("Dừng và reset âm thanh");
+                        } else if (data.soundAction === 'resumeSound') {
+                            if (countdownSound && countdownSound.paused) {
+                                countdownSound.play();
+                                console.log("Phát tiếp âm thanh đang tạm dừng");
+                            }
+                        } else if (data.soundAction === 'pauseSound') {
+                            resumeOffset = countdownSound.currentTime;
+                            countdownSound.pause();
+                        }
+
+
+                        break;
                     default:
                         if (data.round) document.getElementById('round').textContent = data.round;
                         if (data.name_n1) document.getElementById('name_n1').textContent = data.name_n1;
@@ -119,12 +149,17 @@
                         if (data.name_n2) document.getElementById('name_n2').textContent = data.name_n2;
                         if (data.province_n2) document.getElementById('province_n2').textContent = data.province_n2;
                         if (data.minute !== undefined && data.second !== undefined) {
-                            document.getElementById('time').textContent = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
-                            if (data.minute === 0 && data.second === 10) {
-                                // if (!soundPlaying) {
-                                //     sound.play().catch(error => console.error("Error playing sound: ", error));
-                                //     soundPlaying = true;
-                                // }
+                            const timeText = `${String(data.minute).padStart(2, '0')}:${String(data.second).padStart(2, '0')}`;
+                            document.getElementById('time').textContent = timeText;
+
+                            if (data.minute === 0 && data.second === 10 && !countdownPlayed) {
+                                countdownSound.currentTime = 0;
+                                countdownSound.play().catch(err => console.error("Lỗi phát âm:", err));
+                                countdownPlayed = true;
+                            }
+
+                            if (data.minute !== 0 || data.second > 10) {
+                                countdownPlayed = false;
                             }
                         }
                         if (data.diem_n1 !== undefined) document.getElementById('diem_n1').textContent = data.diem_n1;
@@ -132,7 +167,6 @@
                         break;
                 }
 };
-
 
         socket.onerror = function(error) {
             console.log('WebSocket Error: ' + error);
@@ -191,7 +225,7 @@
                     row.appendChild(spacingCell);
                     row.appendChild(tdKetQua);
                     tbody.appendChild(row);
-                });b
+                });
             } catch (error) {
                 console.error('Error:', error);
             }

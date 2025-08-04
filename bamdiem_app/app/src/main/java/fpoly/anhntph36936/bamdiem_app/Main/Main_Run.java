@@ -3,8 +3,11 @@ package fpoly.anhntph36936.bamdiem_app.Main;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +17,7 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import fpoly.anhntph36936.bamdiem_app.API.HOSTAPI;
@@ -49,6 +53,12 @@ public class Main_Run extends AppCompatActivity {
     String id;
     WebSocket webSocket;
     boolean soundPlaying = false;
+    private boolean isCountdown10s = false;
+    private MediaPlayer mediaPlayer;
+    private long pausedTimeLeftInMillis = 0;
+    private boolean pausedSoundPlaying = false;
+    private int soundCurrentPosition = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +70,9 @@ public class Main_Run extends AppCompatActivity {
         btn_run = findViewById(R.id.btn_run);
         btn_10s = findViewById(R.id.btn_10s);
         btn_huys.setVisibility(View.GONE);
+
+        mediaPlayer = MediaPlayer.create(this, R.raw.soudwushu);
+
 
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -79,7 +92,7 @@ public class Main_Run extends AppCompatActivity {
             item = (thidauModel) intent.getSerializableExtra("thidauModel");
 
             tv_round.setText(round);
-            initialTimeInMillis = (minutes * 60 + (seconds + 1)) * 1000;
+            initialTimeInMillis = (minutes * 60 + (seconds)) * 1000;
             timeLeftInMillis = initialTimeInMillis;
             updateTimerDisplay(timeLeftInMillis);
         }
@@ -90,7 +103,10 @@ public class Main_Run extends AppCompatActivity {
             if (Main_BamDiem.isOnOff()) {
                 Toast.makeText(Main_Run.this, "Không thể tắt khi onoff đang bật", Toast.LENGTH_SHORT).show();
             } else {
+                sendSoundControlMessage("stopSound");
                 // Thực hiện hành động tắt
+                soundPlaying = false;
+
                 pauseTimer();
                 stopTemporaryTimer();
                 minutes = 0;
@@ -101,68 +117,105 @@ public class Main_Run extends AppCompatActivity {
             }
         });
 
+        btn_10s.setOnClickListener(v -> {
+            if (Main_BamDiem.isOnOff()) {
+                Toast.makeText(Main_Run.this, "Không thể tắt khi onoff đang bật", Toast.LENGTH_SHORT).show();
+            } else {
+                // ✅ Lưu trạng thái timer chính
+                pausedTimeLeftInMillis = timeLeftInMillis;
+                pausedSoundPlaying = soundPlaying;
 
-        btn_10s.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Main_BamDiem.isOnOff()) {
-                    Toast.makeText(Main_Run.this, "Không thể tắt khi onoff đang bật", Toast.LENGTH_SHORT).show();
-                } else {
-                    pauseTimer();
-                    btn_huy.setVisibility(View.GONE);
-                    btn_huys.setVisibility(View.VISIBLE);
-                    stopTemporaryTimer();
-                    startTemporaryTimer(11000);
+                // ✅ Lưu vị trí phát của âm thanh đang chạy
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    soundCurrentPosition = mediaPlayer.getCurrentPosition();
+                    mediaPlayer.pause();
                 }
+
+                pauseTimer(); // Dừng timer chính
+                btn_huy.setVisibility(View.GONE);
+                btn_huys.setVisibility(View.VISIBLE);
+                stopTemporaryTimer();
+                sendSoundControlMessage("resetCountdown");
+
+                isCountdown10s = true;
+
+                startTemporaryTimer(11000); // Bắt đầu 10s
             }
         });
 
-
-
-        btn_huys.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Main_BamDiem.isOnOff()) {
-                    Toast.makeText(Main_Run.this, "Không thể tắt khi onoff đang bật", Toast.LENGTH_SHORT).show();
-                } else {
-                    stopTemporaryTimer();
-                    btn_huy.setVisibility(View.VISIBLE);
-                    btn_huys.setVisibility(View.GONE);
-                    startTimer();
+        btn_huys.setOnClickListener(v -> {
+            if (Main_BamDiem.isOnOff()) {
+                Toast.makeText(Main_Run.this, "Không thể tắt khi onoff đang bật", Toast.LENGTH_SHORT).show();
+            } else {
+                stopTemporaryTimer();
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                    try {
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
+                // Trả lại trạng thái cho timer chính
+                timeLeftInMillis = pausedTimeLeftInMillis;
+                isCountdown10s = false;
+                btn_huy.setVisibility(View.VISIBLE);
+                btn_huys.setVisibility(View.GONE);
+
+                // Tính toán vị trí âm thanh dựa trên thời gian còn lại của timer chính
+                if (timeLeftInMillis / 1000 <= 10 && pausedSoundPlaying) {
+                    // Giả sử âm thanh dài 10 giây (10,000ms)
+                    int soundDuration = 10000; // Cần xác nhận thời lượng thực tế của file R.raw.soudwushu
+                    long secondsLeft = timeLeftInMillis / 1000;
+                    // Tính vị trí bắt đầu của âm thanh: (10s - thời gian còn lại)
+                    soundCurrentPosition = (int) ((10 - secondsLeft) * 1000);
+                    playSoundAtPosition(soundCurrentPosition);
+                    soundPlaying = true;
+                } else {
+                    soundPlaying = false;
+                }
+
+                startTimer(); // Tiếp tục timer chính
             }
         });
 
         btn_run.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("Main_Run", "Checking isOnOff before btn_run click: " + Main_BamDiem.isOnOff());
-
                 if (Main_BamDiem.isOnOff()) {
                     Toast.makeText(Main_Run.this, "Không thể thao tác khi cấm dùng đang bật", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                    if (isTemporaryTimerRunning) {
-                        if (isRunning) {
-                            pauseTemporaryTimer();
-                            btn_run.setText("Tiếp tục");
-                        } else {
-                            startTemporaryTimer(previousTimeInMillis);
-                            btn_run.setText("Dừng");
+                if (isTemporaryTimerRunning) {
+                    if (isRunning) {
+                        pauseTemporaryTimer();
+                        if (isCountdown10s) {
+                            pauseSound(); // ✅ dùng hàm pauseSound nội bộ
+                            sendSoundControlMessage("pauseSound");
                         }
+                        btn_run.setText("Tiếp tục");
                     } else {
-                        if (isRunning) {
-                            pauseTimer();
-                            btn_run.setText("Tiếp tục");
-                        } else {
-                            startTimer();
-                            btn_run.setText("Dừng");
+                        startTemporaryTimer(previousTimeInMillis);
+                        if (isCountdown10s) {
+                            resumeSound(); // ✅ thêm dòng này để tiếp tục phát lại
+                            sendSoundControlMessage("resumeSound");
                         }
+                        btn_run.setText("Dừng");
+                    }
+                } else {
+                    if (isRunning) {
+                        pauseTimer();
+                        pauseSound(); // ✅ tạm dừng âm thanh
+                        btn_run.setText("Tiếp tục");
+                    } else {
+                        startTimer();
+                        resumeSound(); // ✅ phát tiếp âm thanh nếu còn trong 10s
+                        btn_run.setText("Dừng");
                     }
                 }
-
+            }
         });
 
         startTimer();
@@ -175,23 +228,48 @@ public class Main_Run extends AppCompatActivity {
                 timeLeftInMillis = millisUntilFinished;
                 updateTimerDisplay(timeLeftInMillis);
                 updateClock(id);
-//                if (millisUntilFinished <= 10000 && millisUntilFinished == 10000) {
-//                    sendSoundControlMessage("playSound");
-//                }
+
+                long secondsLeft = millisUntilFinished / 1000;
+                Log.d("TIMER_DEBUG", "secondsLeft = " + secondsLeft + ", isCountdown10s = " + isCountdown10s + ", soundPlaying = " + soundPlaying);
+                if (!isCountdown10s && secondsLeft <= 10 && !soundPlaying) {
+                    // Giả sử âm thanh dài 10 giây (10,000ms)
+                    int soundDuration = 10000; // Cần xác nhận thời lượng thực tế của file R.raw.soudwushu
+                    // Tính vị trí bắt đầu của âm thanh: (10s - thời gian còn lại)
+                    soundCurrentPosition = (int) ((10 - secondsLeft) * 1000);
+                    playSoundAtPosition(soundCurrentPosition);
+                    soundPlaying = true;
+                }
             }
+
             @Override
             public void onFinish() {
                 isRunning = false;
                 tv_run.setText("00:00");
                 btn_run.setText("Tiếp tục");
                 updateClock(id);
+                // Không dừng mediaPlayer để âm thanh chạy hết
             }
         }.start();
+
         isRunning = true;
         btn_run.setText("Dừng");
     }
+
     private void startTemporaryTimer(long duration) {
         previousTimeInMillis = duration;
+
+        // Dừng âm thanh timer chính và lưu lại vị trí
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            soundCurrentPosition = mediaPlayer.getCurrentPosition();
+            mediaPlayer.pause();
+        }
+
+        isCountdown10s = true;
+
+        // Phát âm thanh cho timer 10s từ đầu
+        soundCurrentPosition = 0;
+        playSound();
+
         temporaryCountDownTimer = new CountDownTimer(duration, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -207,7 +285,34 @@ public class Main_Run extends AppCompatActivity {
                 btn_huy.setVisibility(View.VISIBLE);
                 btn_huys.setVisibility(View.GONE);
                 updateClock(id);
-                startTimer();
+
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    timeLeftInMillis = pausedTimeLeftInMillis;
+                    isCountdown10s = false;
+
+                    // Tính toán vị trí âm thanh dựa trên thời gian còn lại của timer chính
+                    if (timeLeftInMillis / 1000 <= 10 && pausedSoundPlaying) {
+                        // Giả sử âm thanh dài 10 giây (10,000ms)
+                        int soundDuration = 10000; // Cần xác nhận thời lượng thực tế của file R.raw.soudwushu
+                        long secondsLeft = timeLeftInMillis / 1000;
+                        // Tính vị trí bắt đầu của âm thanh: (10s - thời gian còn lại)
+                        soundCurrentPosition = (int) ((10 - secondsLeft) * 1000);
+                        playSoundAtPosition(soundCurrentPosition);
+                        soundPlaying = true;
+                    } else {
+                        soundPlaying = false;
+                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                            mediaPlayer.stop();
+                            try {
+                                mediaPlayer.prepare();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    startTimer(); // Tiếp tục timer chính
+                }, 500);
             }
         }.start();
 
@@ -215,7 +320,6 @@ public class Main_Run extends AppCompatActivity {
         isTemporaryTimerRunning = true;
         btn_run.setText("Dừng");
     }
-
 
     private void pauseTimer() {
         if (countDownTimer != null) {
@@ -238,7 +342,6 @@ public class Main_Run extends AppCompatActivity {
             temporaryCountDownTimer.cancel();
         }
         isTemporaryTimerRunning = false;
-//        sendWebSocketMessage("off");
     }
 
     private void updateTimerDisplay(long millisUntilFinished) {
@@ -322,9 +425,6 @@ public class Main_Run extends AppCompatActivity {
         }
     }
 
-
-
-
     private void initWebSocket() {
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
@@ -349,9 +449,8 @@ public class Main_Run extends AppCompatActivity {
 
                     if ("soundControl".equals(action)) {
                         String soundAction = jsonObject.optString("soundAction");
-                        if ("playSound".equals(soundAction)) {
 
-                        } else if ("stopSound".equals(soundAction)) {
+                        if ("resetCountdown".equals(soundAction)) {
 
                         }
                     }
@@ -382,13 +481,114 @@ public class Main_Run extends AppCompatActivity {
             }
         });
     }
+
+    private void playSound() {
+        try {
+            // Nếu mediaPlayer đã tồn tại, không khởi tạo lại
+            if (mediaPlayer == null) {
+                mediaPlayer = MediaPlayer.create(this, R.raw.soudwushu);
+            }
+
+            // Nếu đang phát, dừng và chuẩn bị lại
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.prepare();
+            }
+
+            // Đảm bảo vị trí không vượt quá thời lượng âm thanh
+            int soundDuration = mediaPlayer.getDuration();
+            if (soundCurrentPosition < 0 || soundCurrentPosition >= soundDuration) {
+                soundCurrentPosition = 0;
+            }
+
+            mediaPlayer.seekTo(soundCurrentPosition);
+            mediaPlayer.start();
+            soundPlaying = true;
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                soundCurrentPosition = 0;
+                soundPlaying = false;
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Không thể phát âm thanh", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void pauseSound() {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            soundCurrentPosition = mediaPlayer.getCurrentPosition();
+            mediaPlayer.pause();
+            soundPlaying = false;
+        }
+    }
+
+    private void resumeSound() {
+        if (mediaPlayer != null && !mediaPlayer.isPlaying() && soundCurrentPosition > 0) {
+            // Đảm bảo vị trí không vượt quá thời lượng âm thanh
+            int soundDuration = mediaPlayer.getDuration();
+            if (soundCurrentPosition < 0 || soundCurrentPosition >= soundDuration) {
+                soundCurrentPosition = 0;
+            }
+
+            mediaPlayer.seekTo(soundCurrentPosition);
+            mediaPlayer.start();
+            soundPlaying = true;
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                soundCurrentPosition = 0;
+                soundPlaying = false;
+            });
+        }
+    }
+
+    private void playSoundAtPosition(int position) {
+        try {
+            // Nếu mediaPlayer chưa tồn tại, khởi tạo
+            if (mediaPlayer == null) {
+                mediaPlayer = MediaPlayer.create(this, R.raw.soudwushu);
+            }
+
+            // Nếu đang phát, dừng và chuẩn bị lại
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.prepare();
+            }
+
+            // Đảm bảo vị trí không vượt quá thời lượng âm thanh
+            int soundDuration = mediaPlayer.getDuration();
+            if (position < 0 || position >= soundDuration) {
+                position = 0; // Nếu vị trí không hợp lệ, phát từ đầu
+            }
+
+            mediaPlayer.seekTo(position);
+            mediaPlayer.start();
+            soundPlaying = true;
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                soundCurrentPosition = 0;
+                soundPlaying = false;
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Không thể phát âm thanh", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (webSocket != null) {
             webSocket.close(1000, "App closed");
         }
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
+
 
 
 }

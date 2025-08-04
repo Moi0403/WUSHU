@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-
 const COMMON = require('./database/COMMON');
 const bdiemModel = require('./database/bdiemModel');
 const thidauModel = require('./database/thidauModel');
@@ -23,11 +22,10 @@ app.use(cors());
 const router = express.Router();
 app.use('/api', router);
 
-
 const uri = COMMON.uri;
 
 mongoose.connect(uri, {
-    maxPoolSize: 10 // Giữ lại nếu bạn muốn giới hạn connection pool
+    maxPoolSize: 10
 }).then(() => {
     console.log('Kết nối MongoDB thành công');
 }).catch(err => {
@@ -47,87 +45,74 @@ let currentData = {
 };
 
 let isOn = false;
- let isPlay = false;
- 
- // Buffer để lưu tin nhắn quan trọng
- let messageBuffer = [];
- const MAX_BUFFER_SIZE = 50; // Giới hạn số tin nhắn lưu trong buffer
- 
- // Debounce để giới hạn tần suất gửi dữ liệu
- const debounce = (func, wait) => {
-     let timeout;
-     return (...args) => {
-         clearTimeout(timeout);
-         timeout = setTimeout(() => func(...args), wait);
-     };
- };
- 
- // Hàm broadcast với timestamp để đo độ trễ
- // Hàm broadcast với timestamp và lưu vào buffer
- const broadcastWithTime = debounce((data) => {
-     const payload = { ...data, timestamp: Date.now() };
-     // Lưu vào buffer
-     messageBuffer.push(payload);
-     if (messageBuffer.length > MAX_BUFFER_SIZE) {
-         messageBuffer.shift(); // Xóa tin nhắn cũ nếu vượt quá giới hạn
-     }
-     wss.clients.forEach(client => {
-         if (client.readyState === WebSocket.OPEN) {
-             client.send(JSON.stringify(payload));
-         }
-     });
- }, 50);
- 
- // WebSocket xử lý kết nối
- wss.on('connection', (ws) => {
-     ws.isAlive = true;
-     ws.send(JSON.stringify(currentData));
- 
-     // Gửi lại các tin nhắn trong buffer cho client mới
-     messageBuffer.forEach(msg => {
-         if (ws.readyState === WebSocket.OPEN) {
-             ws.send(JSON.stringify(msg));
-         }
-     });
- 
-     ws.on('message', (message) => {
-         try {
-             const data = JSON.parse(message);
-             if (data.action === 'on') {
-                 isOn = true;
-                 broadcastWithTime({ action: 'statusUpdate', isOn });
-             } else if (data.action === 'off') {
-                 isOn = false;
-                 broadcastWithTime({ action: 'statusUpdate', isOn });
-             } else if (data.action === 'resetAll') {
-                 // Xử lý reset
-                 broadcastWithTime({ action: 'resetAll' });
-             } else if (data.action === 'playSound') {
-                 isPlay = true;
-             } else if (data.action === 'stopSound') {
-                 isPlay = false;
-             }
-         } catch (error) {
-             console.error('Lỗi xử lý message WebSocket:', error);
-         }
-     });
- 
-     ws.on('pong', () => ws.isAlive = true);
-     ws.on('close', () => console.log('Client disconnected'));
-     ws.on('error', (error) => console.error('WebSocket error:', error));
- });
- 
- // Kiểm tra kết nối sống
- setInterval(() => {
-     wss.clients.forEach(ws => {
-         if (!ws.isAlive) return ws.terminate();
-         ws.isAlive = false;
-         ws.ping();
-     });
- }, 10000);
- 
+let isPlay = false;
+let messageBuffer = [];
+const MAX_BUFFER_SIZE = 50;
 
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+    };
+};
 
+const broadcastWithTime = debounce((data) => {
+    const payload = { ...data, timestamp: Date.now() };
+    messageBuffer.push(payload);
+    if (messageBuffer.length > MAX_BUFFER_SIZE) {
+        messageBuffer.shift();
+    }
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(payload));
+        }
+    });
+}, 50);
+
+wss.on('connection', (ws) => {
+    ws.isAlive = true;
+    ws.send(JSON.stringify(currentData));
+
+    messageBuffer.forEach(msg => {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(msg));
+        }
+    });
+
+    ws.on('message', (message) => {
+        try {
+            const data = JSON.parse(message);
+            if (data.action === 'on') {
+                isOn = true;
+                broadcastWithTime({ action: 'statusUpdate', isOn });
+            } else if (data.action === 'off') {
+                isOn = false;
+                broadcastWithTime({ action: 'statusUpdate', isOn });
+            } else if (data.action === 'resetAll') {
+                broadcastWithTime({ action: 'resetAll' });
+            } else if (data.action === 'soundControl') {
+                const soundAction = data.soundAction;
+                broadcastWithTime({ action: 'soundControl', soundAction });
+            }
+        } catch (error) {
+            console.error('Lỗi xử lý message WebSocket:', error);
+        }
+    });
+
+    ws.on('pong', () => ws.isAlive = true);
+    ws.on('close', () => {});
+    ws.on('error', (error) => console.error('WebSocket error:', error));
+});
+
+setInterval(() => {
+    wss.clients.forEach(ws => {
+        if (!ws.isAlive) return ws.terminate();
+        ws.isAlive = false;
+        ws.ping();
+    });
+}, 10000);
+ 
 router.post('/view', (req, res) => {
     currentData = {
         round: req.body.round || currentData.round,
@@ -404,7 +389,7 @@ router.put('/up_thidau/:id', async (req, res) => {
         const result = await thidauModel.findByIdAndUpdate(id, data);
         if (result) {
             let data = await thidauModel.find();
-            console.log(data);
+            // console.log(data);
             res.send(data);
         } else {
             res.send('Không tìm thấy sản phẩm để cập nhật');

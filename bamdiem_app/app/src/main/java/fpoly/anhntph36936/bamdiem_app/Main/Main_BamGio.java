@@ -156,7 +156,7 @@ public class Main_BamGio extends AppCompatActivity {
                 intent.putExtra("id", itemId);
                 intent.putExtra("round", "NGHỈ GIỮA HIỆP");
                 intent.putExtra("minutes", 1);
-                intent.putExtra("seconds", 0);
+                intent.putExtra("seconds", 01);
                 intent.putExtra("diem_n1", diem_n1);
                 intent.putExtra("diem_n2", diem_n2);
                 if (item != null) {
@@ -192,14 +192,14 @@ public class Main_BamGio extends AppCompatActivity {
         btn_1p30s.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleButtonClickTime(btn_1p30s, 01, 30);
+                handleButtonClickTime(btn_1p30s, 00, 12);
             }
         });
 
         btn_2p.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleButtonClickTime(btn_2p, 02, 00);
+                handleButtonClickTime(btn_2p, 02, 01);
             }
         });
 
