@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách vị trí</title>
+    <style>
+        .vitri-box {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            background-color: #007bff;
+            color: white;
+            margin: 10px;
+            border-radius: 8px;
+            text-align: center;
+            line-height: 100px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .vitri-box:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h2>Chọn vị trí:</h2>
+    <div id="vitriContainer"></div>
+
+    <script src="../database/config.js"></script>
+    <script>
+        const host = config;
+        fetch(`http://${config.host}:${config.port}/api/vitri`)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('vitriContainer');
+                data.forEach(item => {
+                    const box = document.createElement('div');
+                    box.className = 'vitri-box';
+                    box.textContent = item.vitri;
+                    box.onclick = () => {
+                        const selectedData = {
+                            vitri: item.vitri,
+                            diemxanh: item.diemxanh,
+                            diemdo: item.diemdo
+                        };
+                        localStorage.setItem('selectedVitri', JSON.stringify(selectedData));
+                        window.location.href = 'BamDiem.html';
+                    };
+
+                    container.appendChild(box);
+                });
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy dữ liệu:', error);
+            });
+    </script>
+</body>
+</html>

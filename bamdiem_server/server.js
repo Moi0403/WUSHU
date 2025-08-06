@@ -186,6 +186,17 @@ router.get('/list', async (req, res) => {
     res.send(bdiems);
 });
 
+// Thay vì chỉ đếm, giờ trả danh sách vị trí
+router.get('/vitri', async (req, res) => {
+    try {
+        const data = await bdiemModel.find({}, 'vitri'); // chỉ lấy trường vitri
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: 'Lỗi khi lấy dữ liệu' });
+    }
+});
+
+
 router.post('/add', async (req, res) => {
     let bdiem = req.body;
     try {

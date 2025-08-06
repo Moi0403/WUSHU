@@ -71,7 +71,7 @@ public class Main_Run extends AppCompatActivity {
         btn_10s = findViewById(R.id.btn_10s);
         btn_huys.setVisibility(View.GONE);
 
-        mediaPlayer = MediaPlayer.create(this, R.raw.soudwushu);
+        mediaPlayer = MediaPlayer.create(this, R.raw.amthanhwushu);
 
 
         getWindow().getDecorView().setSystemUiVisibility(
